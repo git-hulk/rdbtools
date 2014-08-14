@@ -1,8 +1,11 @@
+#ifndef __RDB_PARSER_H_
+#define __RDB_PARSER_H_
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -11,6 +14,9 @@
 #include <netinet/in.h>
 #include "zmalloc.h"
 #include "sds.h"
+#include "adlist.h"
+#include "ziplist.h"
+#include "intset.h"
 #include "fmacros.h"
 #include "lzf.h"
 
@@ -51,6 +57,19 @@
 #define REDIS_SET_INTSET 11
 #define REDIS_ZSET_ZIPLIST 12
 
+#define REDIS_ENCODING_RAW 0     /* Raw representation */
+#define REDIS_ENCODING_INT 1     /* Encoded as integer */
+#define REDIS_ENCODING_HT 2      /* Encoded as hash table */
+#define REDIS_ENCODING_ZIPMAP 3  /* Encoded as zipmap */
+#define REDIS_ENCODING_LINKEDLIST 4 /* Encoded as regular linked list */
+#define REDIS_ENCODING_ZIPLIST 5 /* Encoded as ziplist */
+#define REDIS_ENCODING_INTSET 6  /* Encoded as intset */
+#define REDIS_ENCODING_SKIPLIST 7  /* Encoded as skiplist */
+#define REDIS_ENCODING_LONGSET 8  /* Encoded as longset */
+
+#define REDIS_HEAD 0
+#define REDIS_TAIL 1
+
 #define parsePanic(_e) _redisPanic(#_e,__FILE__,__LINE__),_exit(1)
 
 void _redisPanic(char *msg, char *file, int line) {
@@ -67,3 +86,27 @@ typedef struct {
     off_t parsed_bytes;
     time_t start_time;
 } parserStats;
+
+typedef struct {
+    unsigned char *subject;
+    unsigned char encoding;
+    unsigned char direction; /* Iteration direction */
+    unsigned char *zi; 
+    listNode *ln; 
+} listTypeIterator;
+
+/* Structure for an entry while iterating over a list. */
+typedef struct {
+    listTypeIterator *li;
+    unsigned char *zi;  /* Entry in ziplist */
+    listNode *ln;       /* Entry in linked list */
+} listTypeEntry;
+
+/* Structure to hold set iteration abstraction. */
+typedef struct {
+    unsigned char *subject;
+    int encoding;
+    int ii; /* intset iterator */
+} setTypeIterator;
+
+#endif

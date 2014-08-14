@@ -5,6 +5,10 @@
  */
 #include "rdb_parser.h"
 #include <stdlib.h>
+#include "zipmap.c"
+#include "t_list.c"
+#include "t_set.c"
+#include "t_zset.c"
 #include "crc64.c"
 
 int rdb_version;
@@ -161,6 +165,47 @@ sds rdbLoadStringObject(FILE *fp) {
     return rdbGenericLoadStringObject(fp,0);
 }
 
+void loadHashZipMapObject(unsigned char* zm) {
+     unsigned char *key, *val, *p;
+     unsigned int klen, vlen;
+     
+     p = zipmapRewind(zm);
+     while((p = zipmapNext(p,&key,&klen,&val,&vlen)) != NULL) {
+         //handler key value.
+     }
+}
+
+void loadListZiplistObject(unsigned char* zl) {
+    listTypeIterator *li;
+    listTypeEntry entry;
+
+    li = listTypeInitIterator(zl,0,REDIS_TAIL);
+    while (listTypeNext(li,&entry)) {
+    }
+    listTypeReleaseIterator(li);
+}
+
+void loadSetIntsetObject(unsigned char* sl) {
+    int64_t intele;
+    setTypeIterator *si;
+     si = setTypeInitIterator(sl); 
+     while (setTypeNext(si,&intele) != -1) {
+     }
+     setTypeReleaseIterator(si);
+}
+
+void loadZsetZiplistObject(unsigned char* zl) {
+    unsigned char *eptr, *sptr;
+    double score;
+    eptr = ziplistIndex(zl,0);
+    sptr = ziplistNext(zl,eptr);
+    while (eptr != NULL) {
+        score = zzlGetScore(sptr);
+        // handle value.
+        zzlNext(zl,&eptr,&sptr);
+    }
+}
+
 void rdbLoadValueObject(FILE *fp, int type) {
     unsigned int i;
     size_t len;
@@ -207,9 +252,18 @@ void rdbLoadValueObject(FILE *fp, int type) {
        sds aux = rdbLoadStringObject(fp); 
        switch(type) {
            case REDIS_HASH_ZIPMAP:
-               
+                loadHashZipMapObject((unsigned char*)aux);
+                break;
+           case REDIS_LIST_ZIPLIST:
+                loadListZiplistObject((unsigned char *)aux);
+                break;
+           case REDIS_SET_INTSET:
+                loadSetIntsetObject((unsigned char *)aux);
+                break;
+           case REDIS_ZSET_ZIPLIST:
+                loadZsetZiplistObject((unsigned char *)aux);
+                break;
        }
-
     } else {
         parsePanic("Unknown object type");
     }
