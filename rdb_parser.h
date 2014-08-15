@@ -70,9 +70,9 @@
 #define REDIS_HEAD 0
 #define REDIS_TAIL 1
 
-#define parsePanic(_e) _redisPanic(#_e,__FILE__,__LINE__),_exit(1)
+#define parsePanic(_e) _parsePanic(#_e,__FILE__,__LINE__),_exit(1)
 
-void _redisPanic(char *msg, char *file, int line) {
+void _parsePanic(char *msg, char *file, int line) {
     fprintf(stderr,"!!! Software Failure. Press left mouse button to continue");
     fprintf(stderr,"Guru Meditation: %s #%s:%d",msg,file,line);
 #ifdef HAVE_BACKTRACE
@@ -92,14 +92,12 @@ typedef struct {
     unsigned char encoding;
     unsigned char direction; /* Iteration direction */
     unsigned char *zi; 
-    listNode *ln; 
 } listTypeIterator;
 
 /* Structure for an entry while iterating over a list. */
 typedef struct {
     listTypeIterator *li;
     unsigned char *zi;  /* Entry in ziplist */
-    listNode *ln;       /* Entry in linked list */
 } listTypeEntry;
 
 /* Structure to hold set iteration abstraction. */
@@ -109,4 +107,7 @@ typedef struct {
     int ii; /* intset iterator */
 } setTypeIterator;
 
+typedef void (*keyValueHandler) (int type, void *key, void *val, time_t expiretime);
+
+//keyValueHandler handler;
 #endif

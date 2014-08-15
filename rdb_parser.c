@@ -2,6 +2,13 @@
  * rdb parser for redis.
  * author: @hulk 
  * date: 2014-08-13
+ *
+ * all value object data type we should handle below:
+ * 1. string, we return like "abc" 
+ * 2. list,  we return array like ["abc", "test", "resize"]
+ * 3. set, is the same with list, like [1, 3, 4, 5]
+ * 4. zset, we return ["member1",score1, "member2", score2...]
+ * 5. hash, we return ["key1", "value1", "key2", "value2"...]
  */
 #include "rdb_parser.h"
 #include <stdlib.h>
@@ -16,6 +23,26 @@ double R_Zero, R_PosInf, R_NegInf, R_Nan;
 static parserStats parser_stats;
 /* record check sum */
 static long long digest = 0;
+
+void handler (int type, void *key, void *val, unsigned int vlen, time_t expiretime) {
+    unsigned int i;
+    if(type == REDIS_STRING) {
+        //printf("STRING\t%d\t%s\t%s\n", (int)expiretime, (char *)key, (char *)val);
+    } else if (type == REDIS_SET) {
+        sds *res = (sds *)val;
+        printf("SET\t%s\t%d\t", (char*)key, (int)expiretime);
+        for(i = 0; i < vlen; i++) {
+            printf("%s\t", res[i]);
+        }
+        printf("\n");
+    } else if(type == REDIS_LIST) {
+
+    } else if(type == REDIS_ZSET) { 
+
+    } else if(type == REDIS_HASH) {
+
+    }
+}
 
 size_t fread_check(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
@@ -165,105 +192,181 @@ sds rdbLoadStringObject(FILE *fp) {
     return rdbGenericLoadStringObject(fp,0);
 }
 
-void loadHashZipMapObject(unsigned char* zm) {
-     unsigned char *key, *val, *p;
-     unsigned int klen, vlen;
-     
-     p = zipmapRewind(zm);
-     while((p = zipmapNext(p,&key,&klen,&val,&vlen)) != NULL) {
-         //handler key value.
-     }
+/* load value which hash encoding with zipmap. */
+void *loadHashZipMapObject(unsigned char* zm, unsigned int *rlen) {
+    unsigned char *key, *val, *p;
+    unsigned int klen, vlen, len, i = 0;
+
+    len = zipmapLen(zm);
+    *rlen = len;
+    sds *results = (sds *) zmalloc(len * 2 * sizeof(sds));
+    p = zipmapRewind(zm);
+    while((p = zipmapNext(p,&key,&klen,&val,&vlen)) != NULL) {
+        results[i] = sdsnewlen(key, klen);
+        results[i+1] = sdsnewlen(val, vlen);
+        i += 2;
+    }
+    return results;
 }
 
-void loadListZiplistObject(unsigned char* zl) {
+void *loadListZiplistObject(unsigned char* zl, unsigned int *rlen) {
+    unsigned int i = 0,len;
     listTypeIterator *li;
     listTypeEntry entry;
 
+    len = ziplistLen(zl);
+    *rlen = len;
     li = listTypeInitIterator(zl,0,REDIS_TAIL);
+    sds *results = (sds *) zmalloc(len * sizeof(sds));
     while (listTypeNext(li,&entry)) {
+        results[i++] = listTypeGet(&entry); 
     }
     listTypeReleaseIterator(li);
+
+    return results;
 }
 
-void loadSetIntsetObject(unsigned char* sl) {
+void* loadSetIntsetObject(unsigned char* sl, unsigned int *rlen) {
     int64_t intele;
+    unsigned int i = 0, len;
+
     setTypeIterator *si;
-     si = setTypeInitIterator(sl); 
-     while (setTypeNext(si,&intele) != -1) {
-     }
-     setTypeReleaseIterator(si);
+    len = ((intset*)sl)->length;
+    *rlen = len;
+    si = setTypeInitIterator(sl); 
+
+    int64_t *results = zmalloc(len * sizeof(uint64_t));
+    while (setTypeNext(si,&intele) != -1) {
+        results[i++] = intele; 
+    }
+    setTypeReleaseIterator(si);
+
+    return results;
 }
 
-void loadZsetZiplistObject(unsigned char* zl) {
+void *loadZsetZiplistObject(unsigned char* zl, unsigned int *rlen) {
+    unsigned int i = 0, len;
     unsigned char *eptr, *sptr;
+    unsigned char *vstr;
+    unsigned int vlen;
+    int buf_len;
+    long long vlong;
     double score;
+    char buf[128];
+    sds ele;
+
+    len = ziplistLen (zl);
     eptr = ziplistIndex(zl,0);
     sptr = ziplistNext(zl,eptr);
+    sds *results = (sds *) zmalloc(len* 2 * sizeof(sds));
+    *rlen = len;
     while (eptr != NULL) {
+        ziplistGet(eptr,&vstr,&vlen,&vlong);
+        if (vstr == NULL)
+            ele = sdsfromlonglong(vlong);
+        else
+            ele = sdsnewlen((char*)vstr,vlen);
+        results[i] = ele;
+        buf_len = snprintf(buf, 128, "%f", score);
+        results[i+1] = sdsnewlen(buf, buf_len);
+        i += 2;
         score = zzlGetScore(sptr);
-        // handle value.
         zzlNext(zl,&eptr,&sptr);
     }
+
+    return results;
 }
 
-void rdbLoadValueObject(FILE *fp, int type) {
-    unsigned int i;
-    size_t len;
+void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
+    unsigned int i, j, len;
+    int buf_len;
     sds ele;
+    sds *results;
+    char buf[128];
 
     if(type == REDIS_STRING) {
         /* value type is string. */
-        rdbLoadEncodedStringObject(fp);
+        ele = rdbLoadEncodedStringObject(fp);
+        *rlen = sdslen(ele);
+        return ele;
+
     } else if(type == REDIS_LIST) {
         /* value type is list. */
-        if ((len = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return;
+        if ((len = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
+        j = 0;
+        *rlen = len;
+        results = (sds *) zmalloc(len * sizeof(*results));
         while(len--) {
-            if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return;
+            if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
+            results[j++] = ele;
         }
+        return results;
+
     } else if(type == REDIS_SET) {
         /* value type is set. */
-        if ((len = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return;
+        if ((len = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
+        *rlen = len;
+        results = (char **) zmalloc(len * sizeof(*results));
         for (i = 0; i < len; i++) {
-            if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return;
+            if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
+            results[i] = ele; 
         }
+        return results;
+
     } else if (type == REDIS_ZSET) {
         /* value type is zset */
         size_t zsetlen;
         double score;
-         if ((zsetlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return;
-         while(zsetlen--) {
-             if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return;
-             if (rdbLoadDoubleValue(fp,&score) == -1) return;
-         }
+        if ((zsetlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
+        j = 0;    
+        *rlen = zsetlen;
+        results = malloc( zsetlen * 2 * sizeof(*results));
+        while(zsetlen--) {
+            if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
+            if (rdbLoadDoubleValue(fp,&score) == -1) return NULL;
+            buf_len = snprintf(buf, 128, "%f", score);
+            results[j] = ele;
+            results[j+1] = sdsnewlen(buf, buf_len);
+            j += 2;
+        }
+        return results;
+
     } else if (type == REDIS_HASH) {
         /* value type is hash */
         size_t hashlen;
-        if ((hashlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return;
+        if ((hashlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         sds key, val;
+        j = 0;
+        *rlen = hashlen;
+        results = (char **) zmalloc(hashlen * 2 * sizeof(*results));
         while(hashlen--) {
-            if ((key = rdbLoadEncodedStringObject(fp)) == NULL) return;
-            if ((val = rdbLoadEncodedStringObject(fp)) == NULL) return;
+            if ((key = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
+            if ((val = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
+            results[j] = key;
+            results[j + 1] = val;
+            j += 2;
         }
+        return results;
+
     } else if(type == REDIS_HASH_ZIPMAP || 
             type == REDIS_LIST_ZIPLIST ||
             type == REDIS_SET_INTSET ||
             type == REDIS_ZSET_ZIPLIST ||
             type == REDIS_LSET) {
-       sds aux = rdbLoadStringObject(fp); 
-       switch(type) {
-           case REDIS_HASH_ZIPMAP:
-                loadHashZipMapObject((unsigned char*)aux);
-                break;
-           case REDIS_LIST_ZIPLIST:
-                loadListZiplistObject((unsigned char *)aux);
-                break;
-           case REDIS_SET_INTSET:
-                loadSetIntsetObject((unsigned char *)aux);
-                break;
-           case REDIS_ZSET_ZIPLIST:
-                loadZsetZiplistObject((unsigned char *)aux);
-                break;
-       }
+        sds aux = rdbLoadStringObject(fp); 
+        switch(type) {
+            case REDIS_HASH_ZIPMAP:
+                return loadHashZipMapObject((unsigned char*)aux, rlen);
+            case REDIS_LIST_ZIPLIST:
+                return loadListZiplistObject((unsigned char *)aux, rlen);
+            case REDIS_SET_INTSET:
+                return loadSetIntsetObject((unsigned char *)aux, rlen);
+            case REDIS_ZSET_ZIPLIST:
+                return loadZsetZiplistObject((unsigned char *)aux, rlen);
+        }
+        sdsfree(aux);
+
+        return NULL;
     } else {
         parsePanic("Unknown object type");
     }
@@ -285,11 +388,13 @@ void parse_progress(off_t pos) {
 }
 
 int rdb_parse(char *rdbFile) {
-    int type, loops = 0, dbid;
+    int type, loops = 0, dbid, valType;
+    unsigned int rlen;
     char buf[1024];
     time_t expiretime;
     FILE *fp;
-    sds key;
+    sds key, sval; /* sval is simple string value.*/
+    sds *cval; /*complicatae value*/
 
     /* Double constants initialization */
     R_Zero = 0.0;
@@ -318,15 +423,8 @@ int rdb_parse(char *rdbFile) {
         fprintf(stderr, "Can't handle RDB format version %d\n", rdb_version);
         return PARSE_ERR;
     }
-    /**
-      if (buf[8] != 'c') {
-      fclose(fp);
-      return PARSE_ERR;
-      }
-     **/
 
     printf("-----------------Start Parse---------------------\n");
-
     while(1) {
         if(!(loops++ % 1000)) {
             /* record parse progress every 1000 loops. */
@@ -352,11 +450,41 @@ int rdb_parse(char *rdbFile) {
         if ((key = rdbLoadStringObject(fp)) == NULL) {
             return PARSE_ERR;
         } 
-        /* load value. */
-        rdbLoadValueObject(fp, type);
 
-        /*free key.*/
+        if(type == REDIS_HASH_ZIPMAP) {
+            valType = REDIS_HASH;
+        } else if(type == REDIS_LIST_ZIPLIST) {
+            valType = REDIS_LIST;
+        } else if(type == REDIS_SET_INTSET) {
+            valType = REDIS_SET;
+        } else if(type == REDIS_ZSET_ZIPLIST) {
+            valType = REDIS_ZSET;
+        } else {
+            valType = type;
+        }
+        /* load value. */
+        if(type == REDIS_STRING) {
+            sval = rdbLoadValueObject(fp, type, &rlen);
+            handler(valType, key, sval, rlen, expiretime);
+        } else {
+            cval = rdbLoadValueObject(fp, type, &rlen);
+            handler(valType, key, cval, rlen, expiretime);
+        }
+
+        /* clean*/
         sdsfree(key);
+        if(type == REDIS_STRING) {
+            sdsfree(sval);
+        } else {
+            if( valType == REDIS_ZSET || valType == REDIS_HASH) {
+                rlen = rlen * 2;
+            }
+            unsigned int k;
+            for(k = 0; k < rlen; k++) {
+                sdsfree(cval[k]);
+            }
+            zfree(cval);
+        }
     }
 
     /* checksum */

@@ -3,7 +3,22 @@
 /*-----------------------------------------------------------------------------
  * List API
  *----------------------------------------------------------------------------*/
+ /* Return entry or NULL at the current position of the iterator. */
+sds listTypeGet(listTypeEntry *entry) {
+    sds value = NULL;
+    unsigned char *vstr;
+    unsigned int vlen;
+    long long vlong;
 
+    if (ziplistGet(entry->zi,&vstr,&vlen,&vlong)) {
+        if (vstr) {
+            value = sdsnewlen((char*)vstr,vlen);
+        } else {
+            value = sdsfromlonglong(vlong);
+        }    
+    }    
+    return value;
+}
 //todo: used
 /* Initialize an iterator at the specified index. */
 listTypeIterator *listTypeInitIterator(unsigned char *subject, int index, unsigned char direction) {
