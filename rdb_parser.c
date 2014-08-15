@@ -11,38 +11,21 @@
  * 5. hash, we return ["key1", "value1", "key2", "value2"...]
  */
 #include "rdb_parser.h"
-#include <stdlib.h>
-#include "zipmap.c"
+#include "intset.h"
+#include "ziplist.h"
+#include "zipmap.h"
 #include "t_list.c"
 #include "t_set.c"
 #include "t_zset.c"
+#include "lzf.h"
 #include "crc64.c"
+#include <stdlib.h>
 
 int rdb_version;
 double R_Zero, R_PosInf, R_NegInf, R_Nan;
 static parserStats parser_stats;
 /* record check sum */
 static long long digest = 0;
-
-void handler (int type, void *key, void *val, unsigned int vlen, time_t expiretime) {
-    unsigned int i;
-    if(type == REDIS_STRING) {
-        //printf("STRING\t%d\t%s\t%s\n", (int)expiretime, (char *)key, (char *)val);
-    } else if (type == REDIS_SET) {
-        sds *res = (sds *)val;
-        printf("SET\t%s\t%d\t", (char*)key, (int)expiretime);
-        for(i = 0; i < vlen; i++) {
-            printf("%s\t", res[i]);
-        }
-        printf("\n");
-    } else if(type == REDIS_LIST) {
-
-    } else if(type == REDIS_ZSET) { 
-
-    } else if(type == REDIS_HASH) {
-
-    }
-}
 
 size_t fread_check(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
@@ -387,7 +370,7 @@ void parse_progress(off_t pos) {
     parser_stats.parsed_bytes = pos;
 }
 
-int rdb_parse(char *rdbFile) {
+int rdb_parse(char *rdbFile, keyValueHandler handler) {
     int type, loops = 0, dbid, valType;
     unsigned int rlen;
     char buf[1024];
@@ -424,7 +407,6 @@ int rdb_parse(char *rdbFile) {
         return PARSE_ERR;
     }
 
-    printf("-----------------Start Parse---------------------\n");
     while(1) {
         if(!(loops++ % 1000)) {
             /* record parse progress every 1000 loops. */
@@ -473,7 +455,7 @@ int rdb_parse(char *rdbFile) {
 
         /* clean*/
         sdsfree(key);
-        if(type == REDIS_STRING) {
+        if(valType == REDIS_STRING) {
             sdsfree(sval);
         } else {
             if( valType == REDIS_ZSET || valType == REDIS_HASH) {
@@ -499,33 +481,8 @@ int rdb_parse(char *rdbFile) {
         fprintf(stderr, "DB loaded, checksum: %016llx\n", digest);
     }
 
-    printf("-----------------Stop  Parse---------------------\n");
     fclose(fp);
 
     return PARSE_OK;
 }
 
-int main(int argc, char **argv) {
-
-    if(argc <= 1) {
-        fprintf(stderr, "Usage:\nrdb_parser -[f file]\n\t-f --file specify which rdb file would be parsed.\n");
-        exit(1);
-    }
-
-    int i;
-    char *rdbFile;
-    for(i = 1; i < argc; i++) {
-        if(argc > i+1 && argv[i][0] == '-' && argv[i][1] == 'f') {
-            i += 1;
-            rdbFile = argv[i];
-        }
-    }
-    if(!rdbFile) {
-        fprintf(stderr, "ERR: U must specify rdb file by option -f filepath.\n");
-        exit(1);
-    }
-
-    /* start parse rdb file. */
-    rdb_parse(rdbFile);
-    return 0;
-}

@@ -1,4 +1,4 @@
-#include "rdb_parser.h"
+#include "main.h"
 
 setTypeIterator *setTypeInitIterator(unsigned char* subject) {
     setTypeIterator *si = zmalloc(sizeof(setTypeIterator));
