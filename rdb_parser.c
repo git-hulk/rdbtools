@@ -20,6 +20,7 @@
 #include "lzf.h"
 #include "crc64.c"
 #include <stdlib.h>
+#include <arpa/inet.h>
 
 int rdb_version;
 double R_Zero, R_PosInf, R_NegInf, R_Nan;
@@ -101,6 +102,7 @@ sds rdbLoadIntegerObject(FILE *fp, int enctype, int encode) {
     unsigned char enc[4];
     long long val;
 
+    encode = -1; /* unsed */
     if (enctype == REDIS_RDB_ENC_INT8) {
         if (fread_check(enc,1,1,fp) == 0) return NULL;
         val = (signed char)enc[0];
@@ -375,7 +377,7 @@ int rdb_parse(char *rdbFile, keyValueHandler handler) {
     int type, loops = 0, dbid, valType;
     unsigned int rlen;
     char buf[1024];
-    time_t expiretime;
+    time_t expiretime = -1;
     FILE *fp;
     sds key, sval; /* sval is simple string value.*/
     sds *cval; /*complicatae value*/
