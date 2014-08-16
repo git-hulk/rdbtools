@@ -51,8 +51,12 @@ void userHandler (int type, void *key, void *val, unsigned int vlen, time_t expi
 
 int main(int argc, char **argv) {
 
+    char *usage = "Usage:\nrdb_parser -[f file] [d]\n"
+                  "\t-f --file specify which rdb file would be parsed.\n"
+                  "\t-d --dump parser info, to dump parser stats info.\n"
+                  "\t Notice: This tool only test on redis 2.2 and 2.4, so it may be error in 2.4 later.\n";
     if(argc <= 1) {
-        fprintf(stderr, "Usage:\nrdb_parser -[f file]\n\t-f --file specify which rdb file would be parsed.\n");
+        fprintf(stderr, usage); 
         exit(1);
     }
 
