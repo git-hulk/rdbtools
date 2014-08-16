@@ -6,8 +6,6 @@ all: $(objs)
 	$(CC) $(CFLAGS) -o rdb-parser $(objs) 
 	@echo "--------------------------compile  end  here---------------------------------"
 
-crc64.o: crc64.c
-endian.o: endian.c
 intset.o: intset.c intset.h zmalloc.h endian.h
 lzf_c.o: lzf_c.c lzfP.h
 lzf_d.o: lzf_d.c lzfP.h
