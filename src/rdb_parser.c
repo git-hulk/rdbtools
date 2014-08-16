@@ -221,9 +221,9 @@ void* loadSetIntsetObject(unsigned char* sl, unsigned int *rlen) {
     *rlen = len;
     si = setTypeInitIterator(sl); 
 
-    int64_t *results = zmalloc(len * sizeof(uint64_t));
+    sds *results = zmalloc(len * sizeof(sds));
     while (setTypeNext(si,&intele) != -1) {
-        results[i++] = intele; 
+        results[i++] = sdsfromlonglong(intele); 
     }
     setTypeReleaseIterator(si);
 
@@ -306,7 +306,7 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         if ((zsetlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         j = 0;    
         *rlen = zsetlen;
-        results = malloc( zsetlen * 2 * sizeof(*results));
+        results = zmalloc( zsetlen * 2 * sizeof(*results));
         while(zsetlen--) {
             if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
             if (rdbLoadDoubleValue(fp,&score) == -1) return NULL;

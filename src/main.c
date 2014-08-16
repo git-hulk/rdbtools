@@ -31,7 +31,7 @@ void userHandler (int type, void *key, void *val, unsigned int vlen, time_t expi
     } else if(type == REDIS_ZSET) { 
         sds *res = (sds *)val;
         printf("ZSET\t%d\t%s\t", (int)expiretime, (char *)key);
-        for(i = 0; i < vlen ; i += 2) {
+        for(i = 0; i < vlen * 2; i += 2) {
             printf("(%s,", res[i]);
             printf("%s), ", res[i+1]);
         }
