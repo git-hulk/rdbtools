@@ -1,17 +1,27 @@
 rdb_tools
 =========
 
-#### 1. what about this tool todo?
+#### 1. what about this tool todo? 
 
 > parse rdb file to user format data, like aof file, json etc.
 
-#### 2. how to use?
+#### 2. why write this?
+> rdb file parser can be use in many place, and there are too many data types in redis, also too complicated to many delelopers. so i write this tool to resolve it, by just parse rdb file to simple format data seems like json but difference. like below:
+```
+ if type is STRING, value like "value1"
+ if type is SET, value is array and element type is string. like ["1", "3", "7"]
+ if type is LIST,value is array and element type is string. like ["a", "b", "c"]
+ if type is ZSET,value is array and element type is string. like ["member1", "score1", "member2", "score2"]
+ if type is HASH,value is array and element type is string. like ["key1", "val1", "key2", "val2"]
+```
+
+#### 3. how to use?
 
 >1. cd rdb_tools(or rdb_tools/src)
 2. make, and will be a binary file named rdb-parser in src.
 3. ./rdb-parser -f dump.rdb
 
-#### 3. how to define user's handle for differnt data type.
+#### 4. how to define user's handle for differnt data type.
 > open src/main.c you can see an example function called userHandler, and now just print data to screen. it's prototype is below:
 
 ```c
@@ -32,4 +42,7 @@ rdb_tools
  
 void keyValueHandler(int type, void *key, void *val, unsigned int vlen, time_t expiretime);
 ```
+
+#### 5. contact me?
+> hulk.website@gmail.com
 
