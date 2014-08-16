@@ -1,3 +1,8 @@
+/*
+ * rdb parser for redis.
+ * author: @hulk 
+ * date: 2014-08-13
+ */
 #include "main.h"
 #include "rdb_parser.h"
 

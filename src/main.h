@@ -1,3 +1,8 @@
+/*
+ * rdb parser for redis.
+ * author: @hulk 
+ * date: 2014-08-13
+ */
 #ifndef __MAIN_H_
 #define __MAIN_H_
 #include <stdio.h>

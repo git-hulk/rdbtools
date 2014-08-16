@@ -1,3 +1,17 @@
+/*
+ * rdb parser for redis.
+ * author: @hulk 
+ * date: 2014-08-13
+ *
+ * all value object data type we should handle below:
+ * 1. string, we return like "abc" 
+ * 2. list,  we return array like ["abc", "test", "resize"]
+ * 3. set, is the same with list, like [1, 3, 4, 5]
+ * 4. zset, we return ["member1",score1, "member2", score2...]
+ * 5. hash, we return ["key1", "value1", "key2", "value2"...]
+ */
+
+#include "rdb_parser.h"
 #ifndef __RDB_PARSER_H_
 #define __RDB_PARSER_H_
 #include "main.h"
