@@ -275,12 +275,14 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
 
     if(type == REDIS_STRING) {
         /* value type is string. */
+        parser_stats.parse_num[STRING] += 1;
         ele = rdbLoadEncodedStringObject(fp);
         *rlen = sdslen(ele);
         return ele;
 
     } else if(type == REDIS_LIST) {
         /* value type is list. */
+        parser_stats.parse_num[LIST] += 1;
         if ((len = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         j = 0;
         *rlen = len;
@@ -293,6 +295,7 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
 
     } else if(type == REDIS_SET) {
         /* value type is set. */
+        parser_stats.parse_num[SET] += 1;
         if ((len = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         *rlen = len;
         results = zmalloc(len * sizeof(*results));
@@ -304,10 +307,11 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
 
     } else if (type == REDIS_ZSET) {
         /* value type is zset */
+        parser_stats.parse_num[ZSET] += 1;
         size_t zsetlen;
         double score;
-        if ((zsetlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         j = 0;    
+        if ((zsetlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         if(rdb_version < 2) {
             *rlen = zsetlen * 2;
         } else {
@@ -326,6 +330,7 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
 
     } else if (type == REDIS_HASH) {
         /* value type is hash */
+        parser_stats.parse_num[HASH] += 1;
         size_t hashlen;
         if ((hashlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         sds key, val;
@@ -349,12 +354,16 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         sds aux = rdbLoadStringObject(fp); 
         switch(type) {
             case REDIS_HASH_ZIPMAP:
+                parser_stats.parse_num[HASH] += 1;
                 return loadHashZipMapObject((unsigned char*)aux, rlen);
             case REDIS_LIST_ZIPLIST:
+                parser_stats.parse_num[LIST] += 1;
                 return loadListZiplistObject((unsigned char *)aux, rlen);
             case REDIS_SET_INTSET:
+                parser_stats.parse_num[SET] += 1;
                 return loadSetIntsetObject((unsigned char *)aux, rlen);
             case REDIS_ZSET_ZIPLIST:
+                parser_stats.parse_num[ZSET] += 1;
                 return loadZsetZiplistObject((unsigned char *)aux, rlen);
         }
         sdsfree(aux);
@@ -366,13 +375,17 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
 }
 
 void start_parse(FILE *fp) {
+    int i;
     struct stat sb;
     parser_stats.start_time = time(NULL);
     parser_stats.parsed_bytes = 0;
-    if (fstat(ftello(fp), &sb) == -1) {
+    if (fstat(fileno(fp), &sb) == -1) {
         parser_stats.total_bytes = 1;
     } else {
         parser_stats.total_bytes = sb.st_size;
+    }
+    for(i = 0; i < TOTAL_DATA_TYPES; i++) {
+        parser_stats.parse_num[i] = 0;
     }
 }
 
@@ -417,6 +430,7 @@ int rdb_parse(char *rdbFile, keyValueHandler handler) {
         return PARSE_ERR;
     }
 
+    start_parse(fp);
     while(1) {
         if(!(loops++ % 1000)) {
             /* record parse progress every 1000 loops. */
@@ -487,9 +501,27 @@ int rdb_parse(char *rdbFile, keyValueHandler handler) {
         }
         fprintf(stderr, "DB loaded, checksum: %016llx\n", digest);
     }
-
+    parser_stats.stop_time = time(NULL);
     fclose(fp);
 
     return PARSE_OK;
+}
+
+void dumpParserInfo() {
+    long long total_nums = 0;
+    int i;
+    for(i = 0 ; i < TOTAL_DATA_TYPES; i++) {
+        total_nums += parser_stats.parse_num[i];
+    }
+
+    printf("--------------------------------------------DUMP INFO------------------------------------------\n");
+    printf("Parser parse %ld bytes  cost %ds.\n", (long) parser_stats.total_bytes, (int)(parser_stats.stop_time - parser_stats.start_time));
+    printf("Total parse %ld keys\n", total_nums);
+    printf("\t%ld String keys\n", parser_stats.parse_num[STRING]);
+    printf("\t%ld List keys\n", parser_stats.parse_num[LIST]);
+    printf("\t%ld Set keys\n", parser_stats.parse_num[SET]);
+    printf("\t%ld Zset keys\n", parser_stats.parse_num[ZSET]);
+    printf("\t%ld Hash keys\n", parser_stats.parse_num[HASH]);
+    printf("--------------------------------------------DUMP INFO------------------------------------------\n");
 }
 

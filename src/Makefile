@@ -21,4 +21,4 @@ ziplist.o: ziplist.c zmalloc.h util.h ziplist.h endian.h
 zipmap.o: zipmap.c zmalloc.h endian.h
 zmalloc.o: zmalloc.c config.h zmalloc.h
 clean:
-	rm *.o rdb-parser
+	-rm *.o rdb-parser

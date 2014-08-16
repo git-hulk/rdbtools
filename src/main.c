@@ -57,11 +57,14 @@ int main(int argc, char **argv) {
     }
 
     int i;
+    BOOL dumpParseInfo = FALSE;
     char *rdbFile;
     for(i = 1; i < argc; i++) {
         if(argc > i+1 && argv[i][0] == '-' && argv[i][1] == 'f') {
             i += 1;
             rdbFile = argv[i];
+        } else if(argv[i][0] == '-' && argv[i][1] == 'd'){
+            dumpParseInfo = TRUE;
         }
     }
     if(!rdbFile) {
@@ -70,8 +73,11 @@ int main(int argc, char **argv) {
     }
 
     /* start parse rdb file. */
-    printf("-----------------Start Parse---------------------\n");
+    printf("--------------------------------------------RDB PARSER------------------------------------------\n");
     rdb_parse(rdbFile, userHandler);
-    printf("-----------------Stop  Parse---------------------\n");
+    printf("--------------------------------------------RDB PARSER------------------------------------------\n");
+    if(dumpParseInfo) {
+        dumpParserInfo(); 
+    }
     return 0;
 }

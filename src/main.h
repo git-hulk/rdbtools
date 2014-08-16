@@ -64,7 +64,8 @@
 
 #define REDIS_HEAD 0
 #define REDIS_TAIL 1
-
+enum BOOL_TYPE {FALSE, TRUE};
+typedef enum BOOL_TYPE BOOL;
 
 void _parsePanic(char *msg, char *file, int line);
 #define parsePanic(_e) _parsePanic(#_e,__FILE__,__LINE__),_exit(1)
