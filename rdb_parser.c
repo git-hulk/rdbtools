@@ -29,6 +29,7 @@ static long long digest = 0;
 
 size_t fread_check(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
+//    printf("cur file pos: %ld\n", ftell(stream));
     size_t len = fread(ptr, size, nmemb, stream);
     digest = crc64(digest, (unsigned char*)ptr, size*len);
     return len; 
@@ -401,7 +402,7 @@ int rdb_parse(char *rdbFile, keyValueHandler handler) {
         return PARSE_ERR;
     }
     rdb_version = atoi(buf+5);
-    if (rdb_version < 3 || rdb_version > 6) {
+    if (rdb_version > 6) {
         fclose(fp);
         fprintf(stderr, "Can't handle RDB format version %d\n", rdb_version);
         return PARSE_ERR;

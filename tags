@@ -1,0 +1,486 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+AL_START_HEAD	adlist.h	90;"	d
+AL_START_TAIL	adlist.h	91;"	d
+AVOID_ERRNO	lzfP.h	100;"	d
+CC	Makefile	/^CC = gcc$/;"	m
+CFLAGS	Makefile	/^	CFLAGS = -g -std=c99 -pedantic -Wall -W -fPIC$/;"	m
+CHECK_INPUT	lzfP.h	121;"	d
+FRST	lzf_c.c	48;"	d	file:
+HAVE_BACKTRACE	config.h	29;"	d
+HAVE_EPOLL	config.h	34;"	d
+HAVE_KQUEUE	config.h	38;"	d
+HAVE_MALLOC_SIZE	zmalloc.h	42;"	d
+HAVE_MALLOC_SIZE	zmalloc.h	52;"	d
+HAVE_MALLOC_SIZE	zmalloc.h	60;"	d
+HAVE_PROCFS	config.h	19;"	d
+HAVE_TASKINFO	config.h	24;"	d
+HLOG	lzfP.h	55;"	d
+HSIZE	lzf_c.c	39;"	d	file:
+IDX	lzf_c.c	51;"	d	file:
+IDX	lzf_c.c	53;"	d	file:
+IDX	lzf_c.c	55;"	d	file:
+INIT_HTAB	lzfP.h	91;"	d
+INTSET_ENC_INT16	intset.c	10;"	d	file:
+INTSET_ENC_INT32	intset.c	11;"	d	file:
+INTSET_ENC_INT64	intset.c	12;"	d	file:
+LZFP_h	lzfP.h	38;"	d
+LZF_H	lzf.h	38;"	d
+LZF_STATE	lzfP.h	/^typedef const u8 *LZF_STATE[1 << (HLOG)];$/;"	t
+LZF_STATE_ARG	lzfP.h	109;"	d
+LZF_VERSION	lzf.h	49;"	d
+MAX_LIT	lzf_c.c	74;"	d	file:
+MAX_OFF	lzf_c.c	75;"	d	file:
+MAX_REF	lzf_c.c	76;"	d	file:
+NEXT	lzf_c.c	49;"	d	file:
+PARSE_ERR	main.h	20;"	d
+PARSE_OK	main.h	21;"	d
+PREFIX_SIZE	zmalloc.c	39;"	d	file:
+PREFIX_SIZE	zmalloc.c	42;"	d	file:
+PREFIX_SIZE	zmalloc.c	44;"	d	file:
+REDIS_ENCODING_HT	main.h	57;"	d
+REDIS_ENCODING_INT	main.h	56;"	d
+REDIS_ENCODING_INTSET	main.h	61;"	d
+REDIS_ENCODING_LINKEDLIST	main.h	59;"	d
+REDIS_ENCODING_LONGSET	main.h	63;"	d
+REDIS_ENCODING_RAW	main.h	55;"	d
+REDIS_ENCODING_SKIPLIST	main.h	62;"	d
+REDIS_ENCODING_ZIPLIST	main.h	60;"	d
+REDIS_ENCODING_ZIPMAP	main.h	58;"	d
+REDIS_EOF	main.h	25;"	d
+REDIS_EOF	main.h	40;"	d
+REDIS_EXPIRETIME	main.h	23;"	d
+REDIS_EXPIRETIME	main.h	38;"	d
+REDIS_HASH	main.h	47;"	d
+REDIS_HASH_ZIPMAP	main.h	50;"	d
+REDIS_HEAD	main.h	65;"	d
+REDIS_LIST	main.h	44;"	d
+REDIS_LIST_ZIPLIST	main.h	51;"	d
+REDIS_LSET	main.h	48;"	d
+REDIS_RDB_14BITLEN	main.h	28;"	d
+REDIS_RDB_32BITLEN	main.h	29;"	d
+REDIS_RDB_6BITLEN	main.h	27;"	d
+REDIS_RDB_ENCVAL	main.h	30;"	d
+REDIS_RDB_ENC_INT16	main.h	34;"	d
+REDIS_RDB_ENC_INT32	main.h	35;"	d
+REDIS_RDB_ENC_INT8	main.h	33;"	d
+REDIS_RDB_ENC_LZF	main.h	36;"	d
+REDIS_RDB_LENERR	main.h	31;"	d
+REDIS_SELECTDB	main.h	24;"	d
+REDIS_SELECTDB	main.h	39;"	d
+REDIS_SET	main.h	45;"	d
+REDIS_SET_INTSET	main.h	52;"	d
+REDIS_STRING	main.h	43;"	d
+REDIS_TAIL	main.h	66;"	d
+REDIS_ZSET	main.h	46;"	d
+REDIS_ZSET_ZIPLIST	main.h	53;"	d
+R_Nan	rdb_parser.c	/^double R_Zero, R_PosInf, R_NegInf, R_Nan;$/;"	v
+R_NegInf	rdb_parser.c	/^double R_Zero, R_PosInf, R_NegInf, R_Nan;$/;"	v
+R_PosInf	rdb_parser.c	/^double R_Zero, R_PosInf, R_NegInf, R_Nan;$/;"	v
+R_Zero	rdb_parser.c	/^double R_Zero, R_PosInf, R_NegInf, R_Nan;$/;"	v
+SDS_ABORT_ON_OOM	sds.c	37;"	d	file:
+SDS_MAX_PREALLOC	sds.h	34;"	d
+SET_ERRNO	lzf_d.c	40;"	d	file:
+SET_ERRNO	lzf_d.c	43;"	d	file:
+STANDALONE	lzfP.h	40;"	d
+STRICT_ALIGN	lzfP.h	139;"	d
+STRICT_ALIGN	lzfP.h	140;"	d
+STRICT_ALIGN	lzfP.h	82;"	d
+ULTRA_FAST	lzfP.h	75;"	d
+VERY_FAST	lzfP.h	146;"	d
+VERY_FAST	lzfP.h	64;"	d
+ZIPLIST_BYTES	ziplist.c	90;"	d	file:
+ZIPLIST_ENTRY_END	ziplist.c	96;"	d	file:
+ZIPLIST_ENTRY_HEAD	ziplist.c	94;"	d	file:
+ZIPLIST_ENTRY_TAIL	ziplist.c	95;"	d	file:
+ZIPLIST_HEAD	ziplist.h	1;"	d
+ZIPLIST_HEADER_SIZE	ziplist.c	93;"	d	file:
+ZIPLIST_INCR_LENGTH	ziplist.c	100;"	d	file:
+ZIPLIST_LENGTH	ziplist.c	92;"	d	file:
+ZIPLIST_TAIL	ziplist.h	2;"	d
+ZIPLIST_TAIL_OFFSET	ziplist.c	91;"	d	file:
+ZIPMAP_BIGLEN	zipmap.c	85;"	d	file:
+ZIPMAP_BIGLEN_NEW	zipmap.c	88;"	d	file:
+ZIPMAP_END	zipmap.c	86;"	d	file:
+ZIPMAP_LEN_BYTES	zipmap.c	97;"	d	file:
+ZIPMAP_VALUE_MAX_FREE	zipmap.c	92;"	d	file:
+ZIP_BIGLEN	ziplist.c	75;"	d	file:
+ZIP_END	ziplist.c	74;"	d	file:
+ZIP_INT_16B	ziplist.c	81;"	d	file:
+ZIP_INT_32B	ziplist.c	82;"	d	file:
+ZIP_INT_64B	ziplist.c	83;"	d	file:
+ZIP_IS_INT	ziplist.c	87;"	d	file:
+ZIP_IS_STR	ziplist.c	86;"	d	file:
+ZIP_STR_06B	ziplist.c	78;"	d	file:
+ZIP_STR_14B	ziplist.c	79;"	d	file:
+ZIP_STR_32B	ziplist.c	80;"	d	file:
+ZMALLOC_LIB	zmalloc.h	39;"	d
+ZMALLOC_LIB	zmalloc.h	49;"	d
+ZMALLOC_LIB	zmalloc.h	65;"	d
+_BSD_SOURCE	fmacros.h	4;"	d
+_FILE_OFFSET_BITS	fmacros.h	13;"	d
+_FILE_OFFSET_BITS	main.h	19;"	d
+_LARGEFILE_SOURCE	fmacros.h	12;"	d
+_REDIS_FMACRO_H	fmacros.h	2;"	d
+_XOPEN_SOURCE	fmacros.h	7;"	d
+_XOPEN_SOURCE	fmacros.h	9;"	d
+_ZIPMAP_H	zipmap.h	36;"	d
+__ADLIST_H__	adlist.h	32;"	d
+__CONFIG_H	config.h	2;"	d
+__ENDIAN_H	endian.h	2;"	d
+__INTSET_H	intset.h	2;"	d
+__MAIN_H_	main.h	2;"	d
+__RDB_PARSER_H_	rdb_parser.h	2;"	d
+__REDIS_UTIL_H	util.h	2;"	d
+__SDS_H	sds.h	32;"	d
+__ZMALLOC_H	zmalloc.h	32;"	d
+__str	zmalloc.h	36;"	d
+__xstr	zmalloc.h	35;"	d
+__ziplistCascadeUpdate	ziplist.c	/^static unsigned char *__ziplistCascadeUpdate(unsigned char *zl, unsigned char *p) {$/;"	f	file:
+__ziplistDelete	ziplist.c	/^static unsigned char *__ziplistDelete(unsigned char *zl, unsigned char *p, unsigned int num) {$/;"	f	file:
+__ziplistInsert	ziplist.c	/^static unsigned char *__ziplistInsert(unsigned char *zl, unsigned char *p, unsigned char *s, unsigned int slen) {$/;"	f	file:
+_assert	intset.c	/^void _assert(char *estr, char *file, int line) {$/;"	f
+_intsetGet	intset.c	/^static int64_t _intsetGet(intset *is, int pos) {$/;"	f	file:
+_intsetGetEncoded	intset.c	/^static int64_t _intsetGetEncoded(intset *is, int pos, uint8_t enc) {$/;"	f	file:
+_intsetSet	intset.c	/^static void _intsetSet(intset *is, int pos, int64_t value) {$/;"	f	file:
+_intsetValueEncoding	intset.c	/^static uint8_t _intsetValueEncoding(int64_t v) {$/;"	f	file:
+_parsePanic	main.c	/^void _parsePanic(char *msg, char *file, int line) {$/;"	f
+aof_fsync	config.h	43;"	d
+aof_fsync	config.h	45;"	d
+assert	intset.c	274;"	d	file:
+buf	sds.h	/^    char buf[];$/;"	m	struct:sdshdr
+calloc	zmalloc.c	51;"	d	file:
+calloc	zmalloc.c	56;"	d	file:
+checkConsistency	intset.c	/^void checkConsistency(intset *is) {$/;"	f
+checkType	object.c	/^int checkType(redisClient *c, robj *o, int type) {$/;"	f
+compareStringObjects	object.c	/^int compareStringObjects(robj *a, robj *b) {$/;"	f
+contents	intset.h	/^    int8_t contents[];$/;"	m	struct:intset
+convertToRealHash	t_hash.c	/^void convertToRealHash(robj *o) {$/;"	f
+crc64	crc64.c	/^uint64_t crc64(uint64_t crc, const unsigned char *s, uint64_t l) {$/;"	f
+crc64_tab	crc64.c	/^static const uint64_t crc64_tab[256] = {$/;"	v	file:
+createHashObject	object.c	/^robj *createHashObject(void) {$/;"	f
+createIntList	ziplist.c	/^unsigned char *createIntList() {$/;"	f
+createIntsetObject	object.c	/^robj *createIntsetObject(void) {$/;"	f
+createList	ziplist.c	/^unsigned char *createList() {$/;"	f
+createListObject	object.c	/^robj *createListObject(void) {$/;"	f
+createLongsetObject	object.c	/^robj *createLongsetObject(uint32_t len) {$/;"	f
+createObject	object.c	/^robj *createObject(int type, void *ptr) {$/;"	f
+createSet	intset.c	/^intset *createSet(int bits, int size) {$/;"	f
+createSetObject	object.c	/^robj *createSetObject(void) {$/;"	f
+createStringObject	object.c	/^robj *createStringObject(char *ptr, size_t len) {$/;"	f
+createStringObjectFromLongLong	object.c	/^robj *createStringObjectFromLongLong(long long value) {$/;"	f
+createZiplistObject	object.c	/^robj *createZiplistObject(void) {$/;"	f
+createZsetObject	object.c	/^robj *createZsetObject(void) {$/;"	f
+createZsetZiplistObject	object.c	/^robj *createZsetZiplistObject(void) {$/;"	f
+d2string	util.c	/^int d2string(char *buf, size_t len, double value) {$/;"	f
+debug	ziplist.c	802;"	d	file:
+decrRefCount	object.c	/^void decrRefCount(void *obj) {$/;"	f
+digest	rdb_parser.c	/^static long long digest = 0;$/;"	v	file:
+direction	adlist.h	/^    int direction;$/;"	m	struct:listIter
+direction	main.h	/^    unsigned char direction; \/* Iteration direction *\/$/;"	m	struct:__anon1
+dup	adlist.h	/^    void *(*dup)(void *ptr);$/;"	m	struct:list
+dupStringObject	object.c	/^robj *dupStringObject(robj *o) {$/;"	f
+encoding	intset.h	/^    uint32_t encoding;$/;"	m	struct:intset
+encoding	main.h	/^    int encoding;$/;"	m	struct:__anon3
+encoding	main.h	/^    unsigned char encoding;$/;"	m	struct:__anon1
+encoding	ziplist.c	/^    unsigned char encoding;$/;"	m	struct:zlentry	file:
+equalStringObjects	object.c	/^int equalStringObjects(robj *a, robj *b) {$/;"	f
+error	intset.c	/^void error(char *err) {$/;"	f
+estimateObjectIdleTime	object.c	/^unsigned long estimateObjectIdleTime(robj *o) {$/;"	f
+expect	lzf_c.c	79;"	d	file:
+expect	lzf_c.c	82;"	d	file:
+expect_false	lzf_c.c	86;"	d	file:
+expect_true	lzf_c.c	87;"	d	file:
+fread_check	rdb_parser.c	/^size_t fread_check(void *ptr, size_t size, size_t nmemb, FILE *stream)$/;"	f
+free	adlist.h	/^    void (*free)(void *ptr);$/;"	m	struct:list
+free	sds.h	/^    int free;$/;"	m	struct:sdshdr
+free	zmalloc.c	53;"	d	file:
+free	zmalloc.c	58;"	d	file:
+freeHashObject	object.c	/^void freeHashObject(robj *o) {$/;"	f
+freeListObject	object.c	/^void freeListObject(robj *o) {$/;"	f
+freeSetObject	object.c	/^void freeSetObject(robj *o) {$/;"	f
+freeStringObject	object.c	/^void freeStringObject(robj *o) {$/;"	f
+freeZsetObject	object.c	/^void freeZsetObject(robj *o) {$/;"	f
+getDecodedObject	object.c	/^robj *getDecodedObject(robj *o) {$/;"	f
+hashTypeCurrent	t_hash.c	/^int hashTypeCurrent(hashTypeIterator *hi, int what, robj **objval, unsigned char **v, unsigned int *vlen) {$/;"	f
+hashTypeCurrentObject	t_hash.c	/^robj *hashTypeCurrentObject(hashTypeIterator *hi, int what) {$/;"	f
+hashTypeDelete	t_hash.c	/^int hashTypeDelete(robj *o, robj *key) {$/;"	f
+hashTypeExists	t_hash.c	/^int hashTypeExists(robj *o, robj *key) {$/;"	f
+hashTypeGet	t_hash.c	/^int hashTypeGet(robj *o, robj *key, robj **objval, unsigned char **v,$/;"	f
+hashTypeGetObject	t_hash.c	/^robj *hashTypeGetObject(robj *o, robj *key) {$/;"	f
+hashTypeInitIterator	t_hash.c	/^hashTypeIterator *hashTypeInitIterator(robj *subject) {$/;"	f
+hashTypeLength	t_hash.c	/^unsigned long hashTypeLength(robj *o) {$/;"	f
+hashTypeLookupWriteOrCreate	t_hash.c	/^robj *hashTypeLookupWriteOrCreate(redisClient *c, robj *key) {$/;"	f
+hashTypeNext	t_hash.c	/^int hashTypeNext(hashTypeIterator *hi) {$/;"	f
+hashTypeReleaseIterator	t_hash.c	/^void hashTypeReleaseIterator(hashTypeIterator *hi) {$/;"	f
+hashTypeSet	t_hash.c	/^int hashTypeSet(robj *o, robj *key, robj *value) {$/;"	f
+hashTypeTryConversion	t_hash.c	/^void hashTypeTryConversion(robj *subject, robj **argv, int start, int end) {$/;"	f
+hashTypeTryObjectEncoding	t_hash.c	/^void hashTypeTryObjectEncoding(robj *subject, robj **o1, robj **o2) {$/;"	f
+head	adlist.h	/^    listNode *head;$/;"	m	struct:list
+headersize	ziplist.c	/^    unsigned int headersize;$/;"	m	struct:zlentry	file:
+hex_digit_to_int	sds.c	/^int hex_digit_to_int(char c) {$/;"	f
+ii	main.h	/^    int ii; \/* intset iterator *\/$/;"	m	struct:__anon3
+incrRefCount	object.c	/^void incrRefCount(robj *o) {$/;"	f
+inline	lzf_c.c	80;"	d	file:
+inline	lzf_c.c	83;"	d	file:
+intset	intset.h	/^typedef struct intset {$/;"	s
+intset	intset.h	/^} intset;$/;"	t	typeref:struct:intset
+intsetAdd	intset.c	/^intset *intsetAdd(intset *is, int64_t value, uint8_t *success) {$/;"	f
+intsetBlobLen	intset.c	/^size_t intsetBlobLen(intset *is) {$/;"	f
+intsetFind	intset.c	/^uint8_t intsetFind(intset *is, int64_t value) {$/;"	f
+intsetGet	intset.c	/^uint8_t intsetGet(intset *is, uint32_t pos, int64_t *value) {$/;"	f
+intsetLen	intset.c	/^uint32_t intsetLen(intset *is) {$/;"	f
+intsetMoveTail	intset.c	/^static void intsetMoveTail(intset *is, uint32_t from, uint32_t to) {$/;"	f	file:
+intsetNew	intset.c	/^intset *intsetNew(void) {$/;"	f
+intsetRandom	intset.c	/^int64_t intsetRandom(intset *is) {$/;"	f
+intsetRemove	intset.c	/^intset *intsetRemove(intset *is, int64_t value, int *success) {$/;"	f
+intsetRepr	intset.c	/^void intsetRepr(intset *is) {$/;"	f
+intsetResize	intset.c	/^static intset *intsetResize(intset *is, uint32_t len) {$/;"	f	file:
+intsetSearch	intset.c	/^static uint8_t intsetSearch(intset *is, int64_t value, uint32_t *pos) {$/;"	f	file:
+intsetUpgradeAndAdd	intset.c	/^static intset *intsetUpgradeAndAdd(intset *is, int64_t value) {$/;"	f	file:
+isObjectRepresentableAsLongLong	object.c	/^int isObjectRepresentableAsLongLong(robj *o, long long *llval) {$/;"	f
+is_hex_digit	sds.c	/^int is_hex_digit(char c) {$/;"	f
+keyValueHandler	rdb_parser.h	/^ typedef void keyValueHandler (int type, void *key, void *val,unsigned int vlen,time_t expiretime);$/;"	t
+len	adlist.h	/^    unsigned long len;$/;"	m	struct:list
+len	sds.h	/^    int len;$/;"	m	struct:sdshdr
+len	ziplist.c	/^    unsigned int lensize, len;$/;"	m	struct:zlentry	file:
+length	intset.h	/^    uint32_t length;$/;"	m	struct:intset
+lensize	ziplist.c	/^    unsigned int lensize, len;$/;"	m	struct:zlentry	file:
+li	main.h	/^    listTypeIterator *li;$/;"	m	struct:__anon2
+list	adlist.h	/^typedef struct list {$/;"	s
+list	adlist.h	/^} list;$/;"	t	typeref:struct:list
+listAddNodeHead	adlist.c	/^list *listAddNodeHead(list *list, void *value)$/;"	f
+listAddNodeTail	adlist.c	/^list *listAddNodeTail(list *list, void *value)$/;"	f
+listCreate	adlist.c	/^list *listCreate(void)$/;"	f
+listDelNode	adlist.c	/^void listDelNode(list *list, listNode *node)$/;"	f
+listDup	adlist.c	/^list *listDup(list *orig)$/;"	f
+listFirst	adlist.h	58;"	d
+listGetDupMethod	adlist.h	68;"	d
+listGetFree	adlist.h	69;"	d
+listGetIterator	adlist.c	/^listIter *listGetIterator(list *list, int direction)$/;"	f
+listGetMatchMethod	adlist.h	70;"	d
+listIndex	adlist.c	/^listNode *listIndex(list *list, int index) {$/;"	f
+listInsertNode	adlist.c	/^list *listInsertNode(list *list, listNode *old_node, void *value, int after) {$/;"	f
+listIter	adlist.h	/^typedef struct listIter {$/;"	s
+listIter	adlist.h	/^} listIter;$/;"	t	typeref:struct:listIter
+listLast	adlist.h	59;"	d
+listLength	adlist.h	57;"	d
+listNext	adlist.c	/^listNode *listNext(listIter *iter)$/;"	f
+listNextNode	adlist.h	61;"	d
+listNode	adlist.h	/^typedef struct listNode {$/;"	s
+listNode	adlist.h	/^} listNode;$/;"	t	typeref:struct:listNode
+listNodeValue	adlist.h	62;"	d
+listPrevNode	adlist.h	60;"	d
+listRelease	adlist.c	/^void listRelease(list *list)$/;"	f
+listReleaseIterator	adlist.c	/^void listReleaseIterator(listIter *iter) {$/;"	f
+listRewind	adlist.c	/^void listRewind(list *list, listIter *li) {$/;"	f
+listRewindTail	adlist.c	/^void listRewindTail(list *list, listIter *li) {$/;"	f
+listSearchKey	adlist.c	/^listNode *listSearchKey(list *list, void *key)$/;"	f
+listSetDupMethod	adlist.h	64;"	d
+listSetFreeMethod	adlist.h	65;"	d
+listSetMatchMethod	adlist.h	66;"	d
+listTypeEntry	main.h	/^} listTypeEntry;$/;"	t	typeref:struct:__anon2
+listTypeGet	t_list.c	/^sds listTypeGet(listTypeEntry *entry) {$/;"	f
+listTypeInitIterator	t_list.c	/^listTypeIterator *listTypeInitIterator(unsigned char *subject, int index, unsigned char direction) {$/;"	f
+listTypeIterator	main.h	/^} listTypeIterator;$/;"	t	typeref:struct:__anon1
+listTypeNext	t_list.c	/^int listTypeNext(listTypeIterator *li, listTypeEntry *entry) {$/;"	f
+listTypeReleaseIterator	t_list.c	/^void listTypeReleaseIterator(listTypeIterator *li) {$/;"	f
+ll2string	util.c	/^int ll2string(char *s, size_t len, long long value) {$/;"	f
+loadHashZipMapObject	rdb_parser.c	/^void *loadHashZipMapObject(unsigned char* zm, unsigned int *rlen) {$/;"	f
+loadListZiplistObject	rdb_parser.c	/^void *loadListZiplistObject(unsigned char* zl, unsigned int *rlen) {$/;"	f
+loadSetIntsetObject	rdb_parser.c	/^void* loadSetIntsetObject(unsigned char* sl, unsigned int *rlen) {$/;"	f
+loadZsetZiplistObject	rdb_parser.c	/^void *loadZsetZiplistObject(unsigned char* zl, unsigned int *rlen) {$/;"	f
+lzf_compress	lzf_c.c	/^lzf_compress (const void *const in_data, unsigned int in_len,$/;"	f
+lzf_decompress	lzf_d.c	/^lzf_decompress (const void *const in_data,  unsigned int in_len,$/;"	f
+main	crc64.c	/^int main(int argc, char* argv[]) {$/;"	f
+main	endian.c	/^int main(void) {$/;"	f
+main	intset.c	/^int main(int argc, char **argv) {$/;"	f
+main	main.c	/^int main(int argc, char **argv) {$/;"	f
+main	sds.c	/^int main(void) {$/;"	f
+main	util.c	/^int main(int argc, char **argv) {$/;"	f
+main	ziplist.c	/^int main(int argc, char **argv) {$/;"	f
+main	zipmap.c	/^int main(void) {$/;"	f
+malloc	zmalloc.c	50;"	d	file:
+malloc	zmalloc.c	55;"	d	file:
+match	adlist.h	/^    int (*match)(void *ptr, void *key);$/;"	m	struct:list
+memrev16	endian.c	/^void memrev16(void *p) {$/;"	f
+memrev16ifbe	endian.h	11;"	d
+memrev16ifbe	endian.h	15;"	d
+memrev32	endian.c	/^void memrev32(void *p) {$/;"	f
+memrev32ifbe	endian.h	12;"	d
+memrev32ifbe	endian.h	16;"	d
+memrev64	endian.c	/^void memrev64(void *p) {$/;"	f
+memrev64ifbe	endian.h	13;"	d
+memrev64ifbe	endian.h	17;"	d
+memtoll	util.c	/^long long memtoll(const char *p, int *err) {$/;"	f
+mstime	util.c	/^long long mstime(void) {$/;"	f
+next	adlist.h	/^    listNode *next;$/;"	m	struct:listIter
+next	adlist.h	/^    struct listNode *next;$/;"	m	struct:listNode	typeref:struct:listNode::listNode
+objs	Makefile	/^objs = intset.o sds.o  endian.o  zmalloc.o  zipmap.o lzf_c.o lzf_d.o util.o ziplist.o rdb_parser.o main.o$/;"	m
+ok	intset.c	/^void ok(void) {$/;"	f
+p	ziplist.c	/^    unsigned char *p;$/;"	m	struct:zlentry	file:
+parsePanic	main.h	70;"	d
+parse_progress	rdb_parser.c	/^void parse_progress(off_t pos) {$/;"	f
+parsed_bytes	rdb_parser.h	/^    off_t parsed_bytes;$/;"	m	struct:__anon4
+parserStats	rdb_parser.h	/^} parserStats;$/;"	t	typeref:struct:__anon4
+parser_stats	rdb_parser.c	/^static parserStats parser_stats;$/;"	v	file:
+pop	ziplist.c	/^void pop(unsigned char *zl, int where) {$/;"	f
+prev	adlist.h	/^    struct listNode *prev;$/;"	m	struct:listNode	typeref:struct:listNode::listNode
+prevrawlen	ziplist.c	/^    unsigned int prevrawlensize, prevrawlen;$/;"	m	struct:zlentry	file:
+prevrawlensize	ziplist.c	/^    unsigned int prevrawlensize, prevrawlen;$/;"	m	struct:zlentry	file:
+randstring	ziplist.c	/^int randstring(char *target, unsigned int min, unsigned int max) {$/;"	f
+rdbGenericLoadStringObject	rdb_parser.c	/^sds rdbGenericLoadStringObject(FILE*fp, int encode) {$/;"	f
+rdbLoadDoubleValue	rdb_parser.c	/^int rdbLoadDoubleValue(FILE *fp, double *val) {$/;"	f
+rdbLoadEncodedStringObject	rdb_parser.c	/^sds rdbLoadEncodedStringObject(FILE *fp) {$/;"	f
+rdbLoadIntegerObject	rdb_parser.c	/^sds rdbLoadIntegerObject(FILE *fp, int enctype, int encode) {$/;"	f
+rdbLoadLen	rdb_parser.c	/^uint32_t rdbLoadLen(FILE *fp, int *isencoded) {$/;"	f
+rdbLoadLzfStringObject	rdb_parser.c	/^sds rdbLoadLzfStringObject(FILE*fp) {$/;"	f
+rdbLoadStringObject	rdb_parser.c	/^sds rdbLoadStringObject(FILE *fp) {$/;"	f
+rdbLoadTime	rdb_parser.c	/^long long rdbLoadTime(FILE *fp) {$/;"	f
+rdbLoadType	rdb_parser.c	/^int rdbLoadType(FILE *fp) {$/;"	f
+rdbLoadValueObject	rdb_parser.c	/^void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {$/;"	f
+rdb_parse	rdb_parser.c	/^int rdb_parse(char *rdbFile, keyValueHandler handler) {$/;"	f
+rdb_version	rdb_parser.c	/^int rdb_version;$/;"	v
+realloc	zmalloc.c	52;"	d	file:
+realloc	zmalloc.c	57;"	d	file:
+redis_fstat	config.h	10;"	d
+redis_fstat	config.h	13;"	d
+redis_stat	config.h	11;"	d
+redis_stat	config.h	14;"	d
+resetRefCount	object.c	/^robj *resetRefCount(robj *obj) {$/;"	f
+sds	sds.h	/^typedef char *sds;$/;"	t
+sdsIncrLen	sds.c	/^void sdsIncrLen(sds s, int incr) {$/;"	f
+sdsMakeRoomFor	sds.c	/^sds sdsMakeRoomFor(sds s, size_t addlen) {$/;"	f
+sdsOomAbort	sds.c	/^static void sdsOomAbort(void) {$/;"	f	file:
+sdsavail	sds.h	/^static inline size_t sdsavail(const sds s) {$/;"	f
+sdscat	sds.c	/^sds sdscat(sds s, char *t) {$/;"	f
+sdscatlen	sds.c	/^sds sdscatlen(sds s, void *t, size_t len) {$/;"	f
+sdscatprintf	sds.c	/^sds sdscatprintf(sds s, const char *fmt, ...) {$/;"	f
+sdscatrepr	sds.c	/^sds sdscatrepr(sds s, char *p, size_t len) {$/;"	f
+sdscatsds	sds.c	/^sds sdscatsds(sds s, sds t) {$/;"	f
+sdscatvprintf	sds.c	/^sds sdscatvprintf(sds s, const char *fmt, va_list ap) {$/;"	f
+sdsclear	sds.c	/^void sdsclear(sds s) {$/;"	f
+sdscmp	sds.c	/^int sdscmp(sds s1, sds s2) {$/;"	f
+sdscpy	sds.c	/^sds sdscpy(sds s, char *t) {$/;"	f
+sdscpylen	sds.c	/^sds sdscpylen(sds s, char *t, size_t len) {$/;"	f
+sdsdup	sds.c	/^sds sdsdup(const sds s) {$/;"	f
+sdsempty	sds.c	/^sds sdsempty(void) {$/;"	f
+sdsfree	sds.c	/^void sdsfree(sds s) {$/;"	f
+sdsfreesplitres	sds.c	/^void sdsfreesplitres(sds *tokens, int count) {$/;"	f
+sdsfromlonglong	sds.c	/^sds sdsfromlonglong(long long value) {$/;"	f
+sdsgrowzero	sds.c	/^sds sdsgrowzero(sds s, size_t len) {$/;"	f
+sdshdr	sds.h	/^struct sdshdr {$/;"	s
+sdslen	sds.h	/^static inline size_t sdslen(const sds s) {$/;"	f
+sdsmapchars	sds.c	/^sds sdsmapchars(sds s, char *from, char *to, size_t setlen) {$/;"	f
+sdsnew	sds.c	/^sds sdsnew(const char *init) {$/;"	f
+sdsnewlen	sds.c	/^sds sdsnewlen(const void *init, size_t initlen) {$/;"	f
+sdsrange	sds.c	/^sds sdsrange(sds s, int start, int end) {$/;"	f
+sdssplitargs	sds.c	/^sds *sdssplitargs(char *line, int *argc) {$/;"	f
+sdssplitlen	sds.c	/^sds *sdssplitlen(char *s, int len, char *sep, int seplen, int *count) {$/;"	f
+sdstolower	sds.c	/^void sdstolower(sds s) {$/;"	f
+sdstoupper	sds.c	/^void sdstoupper(sds s) {$/;"	f
+sdstrim	sds.c	/^sds sdstrim(sds s, const char *cset) {$/;"	f
+sdsupdatelen	sds.c	/^void sdsupdatelen(sds s) {$/;"	f
+setTypeInitIterator	t_set.c	/^setTypeIterator *setTypeInitIterator(unsigned char* subject) {$/;"	f
+setTypeIterator	main.h	/^} setTypeIterator;$/;"	t	typeref:struct:__anon3
+setTypeNext	t_set.c	/^int setTypeNext(setTypeIterator *si ,int64_t *llele) {$/;"	f
+setTypeReleaseIterator	t_set.c	/^void setTypeReleaseIterator(setTypeIterator *si) {$/;"	f
+start_parse	rdb_parser.c	/^void start_parse(FILE *fp) {$/;"	f
+start_time	rdb_parser.h	/^    time_t start_time;$/;"	m	struct:__anon4
+strEncoding	object.c	/^char *strEncoding(int encoding) {$/;"	f
+stress	ziplist.c	/^void stress(int pos, int num, int maxsize, int dnum) {$/;"	f
+string2l	util.c	/^int string2l(char *s, size_t slen, long *lval) {$/;"	f
+string2ll	util.c	/^int string2ll(char *s, size_t slen, long long *value) {$/;"	f
+stringObjectLen	object.c	/^size_t stringObjectLen(robj *o) {$/;"	f
+stringmatch	util.c	/^int stringmatch(const char *pattern, const char *string, int nocase) {$/;"	f
+stringmatchlen	util.c	/^int stringmatchlen(const char *pattern, int patternLen,$/;"	f
+subject	main.h	/^    unsigned char *subject;$/;"	m	struct:__anon1
+subject	main.h	/^    unsigned char *subject;$/;"	m	struct:__anon3
+tail	adlist.h	/^    listNode *tail;$/;"	m	struct:list
+test_string2l	util.c	/^void test_string2l(void) {$/;"	f
+test_string2ll	util.c	/^void test_string2ll(void) {$/;"	f
+total_bytes	rdb_parser.h	/^    off_t total_bytes;$/;"	m	struct:__anon4
+tryObjectEncoding	object.c	/^robj *tryObjectEncoding(robj *o) {$/;"	f
+u16	lzfP.h	/^    typedef unsigned int u16;$/;"	t
+u16	lzfP.h	/^    typedef unsigned short u16;$/;"	t
+u8	lzfP.h	/^typedef unsigned char u8;$/;"	t
+update_zmalloc_stat_alloc	zmalloc.c	61;"	d	file:
+update_zmalloc_stat_free	zmalloc.c	73;"	d	file:
+usec	intset.c	/^long long usec(void) {$/;"	f
+usec	ziplist.c	/^long long usec(void) {$/;"	f
+used_memory	zmalloc.c	/^static size_t used_memory = 0;$/;"	v	file:
+used_memory_mutex	zmalloc.c	/^pthread_mutex_t used_memory_mutex = PTHREAD_MUTEX_INITIALIZER;$/;"	v
+userHandler	main.c	/^void userHandler (int type, void *key, void *val, unsigned int vlen, time_t expiretime) {$/;"	f
+ustime	util.c	/^long long ustime(void) {$/;"	f
+value	adlist.h	/^    void *value;$/;"	m	struct:listNode
+zcalloc	zmalloc.c	/^void *zcalloc(size_t size) {$/;"	f
+zfree	zmalloc.c	/^void zfree(void *ptr) {$/;"	f
+zi	main.h	/^    unsigned char *zi;  \/* Entry in ziplist *\/$/;"	m	struct:__anon2
+zi	main.h	/^    unsigned char *zi; $/;"	m	struct:__anon1
+zipDecodeLength	ziplist.c	/^static unsigned int zipDecodeLength(unsigned char *p, unsigned int *lensize) {$/;"	f	file:
+zipEncodeLength	ziplist.c	/^static unsigned int zipEncodeLength(unsigned char *p, unsigned char encoding, unsigned int rawlen) {$/;"	f	file:
+zipEntry	ziplist.c	/^static zlentry zipEntry(unsigned char *p) {$/;"	f	file:
+zipEntryEncoding	ziplist.c	/^static unsigned int zipEntryEncoding(unsigned char *p) {$/;"	f	file:
+zipIntSize	ziplist.c	/^static unsigned int zipIntSize(unsigned char encoding) {$/;"	f	file:
+zipLoadInteger	ziplist.c	/^static int64_t zipLoadInteger(unsigned char *p, unsigned char encoding) {$/;"	f	file:
+zipPrevDecodeLength	ziplist.c	/^static unsigned int zipPrevDecodeLength(unsigned char *p, unsigned int *lensize) {$/;"	f	file:
+zipPrevEncodeLength	ziplist.c	/^static unsigned int zipPrevEncodeLength(unsigned char *p, unsigned int len) {$/;"	f	file:
+zipPrevEncodeLengthForceLarge	ziplist.c	/^static void zipPrevEncodeLengthForceLarge(unsigned char *p, unsigned int len) {$/;"	f	file:
+zipPrevLenByteDiff	ziplist.c	/^static int zipPrevLenByteDiff(unsigned char *p, unsigned int len) {$/;"	f	file:
+zipRawEntryLength	ziplist.c	/^static unsigned int zipRawEntryLength(unsigned char *p) {$/;"	f	file:
+zipSaveInteger	ziplist.c	/^static void zipSaveInteger(unsigned char *p, int64_t value, unsigned char encoding) {$/;"	f	file:
+zipTryEncoding	ziplist.c	/^static int zipTryEncoding(unsigned char *entry, unsigned int entrylen, long long *v, unsigned char *encoding) {$/;"	f	file:
+ziplistBlobLen	ziplist.c	/^size_t ziplistBlobLen(unsigned char *zl) {$/;"	f
+ziplistCompare	ziplist.c	/^unsigned int ziplistCompare(unsigned char *p, unsigned char *sstr, unsigned int slen) {$/;"	f
+ziplistDelete	ziplist.c	/^unsigned char *ziplistDelete(unsigned char *zl, unsigned char **p) {$/;"	f
+ziplistDeleteRange	ziplist.c	/^unsigned char *ziplistDeleteRange(unsigned char *zl, unsigned int index, unsigned int num) {$/;"	f
+ziplistGet	ziplist.c	/^unsigned int ziplistGet(unsigned char *p, unsigned char **sstr, unsigned int *slen, long long *sval) {$/;"	f
+ziplistIndex	ziplist.c	/^unsigned char *ziplistIndex(unsigned char *zl, int index) {$/;"	f
+ziplistInsert	ziplist.c	/^unsigned char *ziplistInsert(unsigned char *zl, unsigned char *p, unsigned char *s, unsigned int slen) {$/;"	f
+ziplistLen	ziplist.c	/^unsigned int ziplistLen(unsigned char *zl) {$/;"	f
+ziplistNew	ziplist.c	/^unsigned char *ziplistNew(void) {$/;"	f
+ziplistNext	ziplist.c	/^unsigned char *ziplistNext(unsigned char *zl, unsigned char *p) {$/;"	f
+ziplistPrev	ziplist.c	/^unsigned char *ziplistPrev(unsigned char *zl, unsigned char *p) {$/;"	f
+ziplistPush	ziplist.c	/^unsigned char *ziplistPush(unsigned char *zl, unsigned char *s, unsigned int slen, int where) {$/;"	f
+ziplistRepr	ziplist.c	/^void ziplistRepr(unsigned char *zl) {$/;"	f
+ziplistResize	ziplist.c	/^static unsigned char *ziplistResize(unsigned char *zl, unsigned int len) {$/;"	f	file:
+zipmapBlobLen	zipmap.c	/^size_t zipmapBlobLen(unsigned char *zm) {$/;"	f
+zipmapDecodeLength	zipmap.c	/^static unsigned int zipmapDecodeLength(unsigned char *p) {$/;"	f	file:
+zipmapDel	zipmap.c	/^unsigned char *zipmapDel(unsigned char *zm, unsigned char *key, unsigned int klen, int *deleted) {$/;"	f
+zipmapEncodeLength	zipmap.c	/^static unsigned int zipmapEncodeLength(unsigned char *p, unsigned int len) {$/;"	f	file:
+zipmapExists	zipmap.c	/^int zipmapExists(unsigned char *zm, unsigned char *key, unsigned int klen) {$/;"	f
+zipmapGet	zipmap.c	/^int zipmapGet(unsigned char *zm, unsigned char *key, unsigned int klen, unsigned char **value, unsigned int *vlen) {$/;"	f
+zipmapLen	zipmap.c	/^unsigned int zipmapLen(unsigned char *zm) {$/;"	f
+zipmapLookupRaw	zipmap.c	/^static unsigned char *zipmapLookupRaw(unsigned char *zm, unsigned char *key, unsigned int klen, unsigned int *totlen) {$/;"	f	file:
+zipmapNew	zipmap.c	/^unsigned char *zipmapNew(void) {$/;"	f
+zipmapNext	zipmap.c	/^unsigned char *zipmapNext(unsigned char *zm, unsigned char **key, unsigned int *klen, unsigned char **value, unsigned int *vlen) {$/;"	f
+zipmapRawEntryLength	zipmap.c	/^static unsigned int zipmapRawEntryLength(unsigned char *p) {$/;"	f	file:
+zipmapRawKeyLength	zipmap.c	/^static unsigned int zipmapRawKeyLength(unsigned char *p) {$/;"	f	file:
+zipmapRawValueLength	zipmap.c	/^static unsigned int zipmapRawValueLength(unsigned char *p) {$/;"	f	file:
+zipmapRepr	zipmap.c	/^void zipmapRepr(unsigned char *p) {$/;"	f
+zipmapRequiredLength	zipmap.c	/^static unsigned long zipmapRequiredLength(unsigned int klen, unsigned int vlen) {$/;"	f	file:
+zipmapResize	zipmap.c	/^static inline unsigned char *zipmapResize(unsigned char *zm, unsigned int len) {$/;"	f	file:
+zipmapRewind	zipmap.c	/^unsigned char *zipmapRewind(unsigned char *zm) {$/;"	f
+zipmapSet	zipmap.c	/^unsigned char *zipmapSet(unsigned char *zm, unsigned char *key, unsigned int klen, unsigned char *val, unsigned int vlen, int *update) {$/;"	f
+zlentry	ziplist.c	/^typedef struct zlentry {$/;"	s	file:
+zlentry	ziplist.c	/^} zlentry;$/;"	t	typeref:struct:zlentry	file:
+zmalloc	zmalloc.c	/^void *zmalloc(size_t size) {$/;"	f
+zmalloc_enable_thread_safeness	zmalloc.c	/^void zmalloc_enable_thread_safeness(void) {$/;"	f
+zmalloc_get_fragmentation_ratio	zmalloc.c	/^float zmalloc_get_fragmentation_ratio(void) {$/;"	f
+zmalloc_get_rss	zmalloc.c	/^size_t zmalloc_get_rss(void) {$/;"	f
+zmalloc_get_thread_safty	zmalloc.c	/^int zmalloc_get_thread_safty(void) {$/;"	f
+zmalloc_oom	zmalloc.c	/^static void zmalloc_oom(size_t size) {$/;"	f	file:
+zmalloc_set_used_memory	zmalloc.c	/^void zmalloc_set_used_memory(size_t um) {$/;"	f
+zmalloc_size	zmalloc.h	43;"	d
+zmalloc_size	zmalloc.h	53;"	d
+zmalloc_size	zmalloc.h	61;"	d
+zmalloc_thread_safe	zmalloc.c	/^static int zmalloc_thread_safe = 0;$/;"	v	file:
+zmalloc_used_memory	zmalloc.c	/^size_t zmalloc_used_memory(void) {$/;"	f
+zrealloc	zmalloc.c	/^void *zrealloc(void *ptr, size_t size) {$/;"	f
+zstrdup	zmalloc.c	/^char *zstrdup(const char *s) {$/;"	f
+zzlGetScore	t_zset.c	/^double zzlGetScore(unsigned char *sptr) {$/;"	f
+zzlNext	t_zset.c	/^void zzlNext(unsigned char *zl, unsigned char **eptr, unsigned char **sptr) {$/;"	f

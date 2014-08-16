@@ -78,6 +78,7 @@
 #define ZIP_STR_06B (0 << 6)
 #define ZIP_STR_14B (1 << 6)
 #define ZIP_STR_32B (2 << 6)
+#define ZIP_INT_8B (0xfe)
 #define ZIP_INT_16B (0xc0 | 0<<4)
 #define ZIP_INT_32B (0xc0 | 1<<4)
 #define ZIP_INT_64B (0xc0 | 2<<4)
@@ -125,9 +126,11 @@ static unsigned int zipEntryEncoding(unsigned char *p) {
 /* Return bytes needed to store integer encoded by 'encoding' */
 static unsigned int zipIntSize(unsigned char encoding) {
     switch(encoding) {
+    case ZIP_INT_8B:  return sizeof(int8_t);
     case ZIP_INT_16B: return sizeof(int16_t);
     case ZIP_INT_32B: return sizeof(int32_t);
     case ZIP_INT_64B: return sizeof(int64_t);
+    default: return 0;
     }
     assert(NULL);
     return 0;
