@@ -1,6 +1,8 @@
 rdb_tools
 =========
 
-rdb parser for redis
+#### what about this tool todo?
 
-developing...
+`parse rdb file to user format data, like aof file, json etc.`
+
+
