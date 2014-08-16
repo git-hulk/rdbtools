@@ -30,7 +30,6 @@ static long long digest = 0;
 
 size_t fread_check(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
-//    printf("cur file pos: %ld\n", ftell(stream));
     size_t len = fread(ptr, size, nmemb, stream);
     digest = crc64(digest, (unsigned char*)ptr, size*len);
     return len; 
@@ -184,7 +183,7 @@ void *loadHashZipMapObject(unsigned char* zm, unsigned int *rlen) {
     unsigned int klen, vlen, len, i = 0;
 
     len = zipmapLen(zm);
-    *rlen = len;
+    *rlen = len * 2;
     sds *results = (sds *) zmalloc(len * 2 * sizeof(sds));
     p = zipmapRewind(zm);
     while((p = zipmapNext(p,&key,&klen,&val,&vlen)) != NULL) {
@@ -245,7 +244,11 @@ void *loadZsetZiplistObject(unsigned char* zl, unsigned int *rlen) {
     eptr = ziplistIndex(zl,0);
     sptr = ziplistNext(zl,eptr);
     sds *results = (sds *) zmalloc(len* 2 * sizeof(sds));
-    *rlen = len;
+    if(rdb_version < 2) {
+        *rlen = len * 2;
+    } else {
+        *rlen = len;
+    }
     while (eptr != NULL) {
         ziplistGet(eptr,&vstr,&vlen,&vlong);
         if (vstr == NULL)
@@ -281,7 +284,7 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         if ((len = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         j = 0;
         *rlen = len;
-        results = (sds *) zmalloc(len * sizeof(*results));
+        results = zmalloc(len * sizeof(*results));
         while(len--) {
             if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
             results[j++] = ele;
@@ -292,7 +295,7 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         /* value type is set. */
         if ((len = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         *rlen = len;
-        results = (char **) zmalloc(len * sizeof(*results));
+        results = zmalloc(len * sizeof(*results));
         for (i = 0; i < len; i++) {
             if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
             results[i] = ele; 
@@ -305,7 +308,11 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         double score;
         if ((zsetlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         j = 0;    
-        *rlen = zsetlen;
+        if(rdb_version < 2) {
+            *rlen = zsetlen * 2;
+        } else {
+            *rlen = zsetlen;
+        }
         results = zmalloc( zsetlen * 2 * sizeof(*results));
         while(zsetlen--) {
             if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
@@ -323,8 +330,8 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         if ((hashlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
         sds key, val;
         j = 0;
-        *rlen = hashlen;
-        results = (char **) zmalloc(hashlen * 2 * sizeof(*results));
+        *rlen = hashlen * 2;
+        results = zmalloc(hashlen * 2 * sizeof(*results));
         while(hashlen--) {
             if ((key = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
             if ((val = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
@@ -461,9 +468,6 @@ int rdb_parse(char *rdbFile, keyValueHandler handler) {
         if(valType == REDIS_STRING) {
             sdsfree(sval);
         } else {
-            if( valType == REDIS_ZSET || valType == REDIS_HASH) {
-                rlen = rlen * 2;
-            }
             unsigned int k;
             for(k = 0; k < rlen; k++) {
                 sdsfree(cval[k]);
