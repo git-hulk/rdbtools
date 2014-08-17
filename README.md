@@ -23,10 +23,11 @@ rdb_tools
 ```
 
 #### 3. how to use?
-
->1. cd rdb_tools(or rdb_tools/src)
-2. make, and will be a binary file named rdb-parser in src.
-3. ./rdb-parser -f dump.rdb
+```shell
+$ cd rdb_tools # (or rdb_tools/src)
+$ make # and will be a binary file named rdb-parser in src.
+3. ./rdb-parser -f dump.rdb # start parse
+```
 
 #### 4. how to define user's handle for differnt data type.
 > open src/main.c you can see an example function called userHandler, and now just print data to screen. it's prototype is below:
