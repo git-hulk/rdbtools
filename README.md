@@ -51,6 +51,9 @@ $ ./rdb-parser -f dump.rdb # start parse
 void keyValueHandler(int type, void *key, void *val, unsigned int vlen, time_t expiretime);
 ```
 
-#### 5. contact me?
+#### 5. test snapshot
+![image](https://github.com/git-hulk/rdbtools/blob/master/snapshot/rdb-tools.png)
+
+#### 6. contact me?
 > hulk.website@gmail.com
 
