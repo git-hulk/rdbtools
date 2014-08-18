@@ -46,9 +46,10 @@ $ ./rdb-parser -f dump.rdb # start parse
  * @param val:  val is denpend on type.
  * @ vlen, if type == STRING, vlen represent length of val string, or vlen is length of val array.
  * @ expiretime, expiretime in db,if not set, expiretime = -1.
+ * @ return any data as you like.
  */
  
-void keyValueHandler(int type, void *key, void *val, unsigned int vlen, time_t expiretime);
+void* keyValueHandler(int type, void *key, void *val, unsigned int vlen, time_t expiretime);
 ```
 
 #### 5. test snapshot
