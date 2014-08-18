@@ -15,7 +15,7 @@ void _parsePanic(char *msg, char *file, int line) {
 #endif
 }
 
-void userHandler (int type, void *key, void *val, unsigned int vlen, time_t expiretime) {
+void* userHandler (int type, void *key, void *val, unsigned int vlen, time_t expiretime) {
     unsigned int i;
     if(type == REDIS_STRING) {
         printf("STRING\t%d\t%s\t%s\n", (int)expiretime, (char *)key, (char *)val);
@@ -51,6 +51,7 @@ void userHandler (int type, void *key, void *val, unsigned int vlen, time_t expi
         }
         printf("\n");
     }
+    return NULL;
 }
 
 
@@ -65,7 +66,7 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    int i;
+    int i, parse_result;
     BOOL dumpParseInfo = FALSE;
     char *rdbFile;
     for(i = 1; i < argc; i++) {
@@ -83,9 +84,9 @@ int main(int argc, char **argv) {
 
     /* start parse rdb file. */
     printf("--------------------------------------------RDB PARSER------------------------------------------\n");
-    rdb_parse(rdbFile, userHandler);
+    parse_result = rdb_parse(rdbFile, userHandler);
     printf("--------------------------------------------RDB PARSER------------------------------------------\n");
-    if(dumpParseInfo) {
+    if(parse_result == PARSE_OK && dumpParseInfo) {
         dumpParserInfo(); 
     }
     return 0;

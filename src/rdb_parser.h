@@ -30,7 +30,7 @@ typedef struct {
     long parse_num[TOTAL_DATA_TYPES];
 } parserStats;
 
-typedef void keyValueHandler (int type, void *key, void *val,unsigned int vlen,time_t expiretime);
+typedef void* keyValueHandler (int type, void *key, void *val,unsigned int vlen,time_t expiretime);
 void dumpParserInfo();
 int rdb_parse(char *rdbFile, keyValueHandler handler);
 
