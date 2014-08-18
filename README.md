@@ -3,17 +3,17 @@ rdb_tools
 
 > Notice: 
 
->1. many files was copied from redis, like sds, zmalloc without any change, I think it's not necessary to rewrite again, but some like t_set, t_list, t_zset, just take what we need, it's need a little function, like iterator.
+>1. many files was copied from redis, like sds, zmalloc without any change, I think it's not necessary to rewrite again, but some like t_set, t_list, t_zset, just take the function which we needed, like iterator.
 
->2. This tools only test redis branch 2.2 & 2.4 in github, so it can't be used in redis 2.4 later.
+>2. This tools only tested on redis branch 2.2 & 2.4 in github, so it can't be used in redis 2.4 later.
 
 
-#### 1. what about this tool todo? 
+#### 1. what about this tool to do? 
 
 > parse rdb file to user's format data, like aof file, json etc.
 
 #### 2. why write this?
-> rdb file parser can be used in many place, and there are too many data types in redis, also too complicated to many delelopers. so I write this tool to resolve it, by just parse rdb file to simple format data seems like json but difference. like below:
+> rdb file parser can be used in many places, and there are too many data types in redis, also too complicated to many developers. so I write this tool to resolve it, by parsing rdb file to simple format data seems like json but difference. like below:
 ```
  if type is STRING, value like "value1"
  if type is SET, value is array and element type is string. like ["1", "3", "7"]
@@ -30,7 +30,7 @@ $ ./rdb-parser -d -f dump.rdb # start parse
 ```
 
 #### 4. how to define user's handle for differnt data type.
-> open src/main.c you can see an example function called userHandler, and now just print data to screen. it's prototype is below:
+> open src/main.c you can see an example callback function called userHandler, which prints data to screen. it's prototype is below:
 
 ```c
 /*
