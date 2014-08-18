@@ -11,14 +11,9 @@
  * 5. hash, we return ["key1", "value1", "key2", "value2"...]
  */
 #include "rdb_parser.h"
-#include "intset.h"
-#include "ziplist.h"
-#include "zipmap.h"
-#include "t_list.c"
-#include "t_set.c"
-#include "t_zset.c"
 #include "lzf.h"
 #include "crc64.c"
+#include "util.h"
 #include <stdlib.h>
 #include <arpa/inet.h>
 

@@ -20,6 +20,10 @@
 #include "zmalloc.h"
 #include "sds.h"
 #include "fmacros.h"
+#include "intset.h"                     
+#include "ziplist.h"                    
+#include "zipmap.h"                     
+#include "lzf.h"
 
 #define _FILE_OFFSET_BITS 64
 #define PARSE_ERR -1
