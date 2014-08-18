@@ -30,7 +30,7 @@ $ ./rdb-parser -d -f dump.rdb # start parse
 ```
 
 #### 4. how to define user's handle for differnt data type.
-> open src/main.c you can see an example callback function called userHandler, which prints data to screen. it's prototype is below:
+> open src/main.c you can see an example callback function called userHandler, which prints data to screen. Prototype is below:
 
 ```c
 /*
