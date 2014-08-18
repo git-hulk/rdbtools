@@ -3,9 +3,9 @@ rdb_tools
 
 > Notice: 
 
->1. many files was copied from redis, like sds, zmalloc without change, I think it's not necessary to rewrite again, but some like t_set, t_list, t_zset, we just take what we need, it's need a little function, like iterator.
+>1. many files was copied from redis, like sds, zmalloc without any change, I think it's not necessary to rewrite again, but some like t_set, t_list, t_zset, just take what we need, it's need a little function, like iterator.
 
->2. This can't only test in redis branch 2.2 & 2.4 in github, it would be error when it was used in redis 2.4 later.
+>2. This tools only test redis branch 2.2 & 2.4 in github, so it can't be used in redis 2.4 later.
 
 
 #### 1. what about this tool todo? 
