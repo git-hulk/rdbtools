@@ -13,7 +13,7 @@ rdb_tools
 > parse rdb file to user's format data, like aof file, json etc.
 
 #### 2. why write this?
-> rdb file parser can be used in many places, and there are too many data types in redis, also too complicated to many developers. so I write this tool to resolve it, by parsing rdb file to simple format data seems like json but difference. like below:
+> rdb file parser can be used in many places, and there are too many data types in redis, also too complicated for many developers. so I write this tool to resolve it, by parsing rdb file to simple format data seems like json but difference. like below:
 ```
  if type is STRING, value like "value1"
  if type is SET, value is array and element type is string. like ["1", "3", "7"]
