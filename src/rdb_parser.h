@@ -11,7 +11,6 @@
  * 5. hash, we return ["key1", "value1", "key2", "value2"...]
  */
 
-#include "rdb_parser.h"
 #ifndef __RDB_PARSER_H_
 #define __RDB_PARSER_H_
 #include "main.h"

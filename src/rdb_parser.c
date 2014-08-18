@@ -515,8 +515,8 @@ void dumpParserInfo() {
     }
 
     printf("--------------------------------------------DUMP INFO------------------------------------------\n");
-    printf("Parser parse %ld bytes  cost %ds.\n", (long) parser_stats.total_bytes, (int)(parser_stats.stop_time - parser_stats.start_time));
-    printf("Total parse %ld keys\n", total_nums);
+    printf("Parser parse %ld bytes  cost %ds.\n", (long) parser_stats.total_bytes, (int)((int)parser_stats.stop_time - (int)parser_stats.start_time));
+    printf("Total parse %lld keys\n", total_nums);
     printf("\t%ld String keys\n", parser_stats.parse_num[STRING]);
     printf("\t%ld List keys\n", parser_stats.parse_num[LIST]);
     printf("\t%ld Set keys\n", parser_stats.parse_num[SET]);
