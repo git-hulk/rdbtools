@@ -44,7 +44,7 @@ void* userHandler (int type, void *key, void *val, unsigned int vlen, time_t exp
 
     } else if(type == REDIS_HASH) {
         sds *res = (sds *)val;
-        printf("LIST\t%d\t%s\t", (int)expiretime, (char *)key);
+        printf("HASH\t%d\t%s\t", (int)expiretime, (char *)key);
         for(i = 0; i < vlen; i += 2) {
             printf("(%s, ", res[i]);
             printf("%s), ", res[i+1]);

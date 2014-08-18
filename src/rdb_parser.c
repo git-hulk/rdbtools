@@ -179,7 +179,7 @@ void *loadHashZipMapObject(unsigned char* zm, unsigned int *rlen) {
 
     len = zipmapLen(zm);
     *rlen = len * 2;
-    sds *results = (sds *) zmalloc(len * 2 * sizeof(sds));
+    sds *results = (sds *) zmalloc(*rlen * sizeof(sds));
     p = zipmapRewind(zm);
     while((p = zipmapNext(p,&key,&klen,&val,&vlen)) != NULL) {
         results[i] = sdsnewlen(key, klen);
@@ -238,13 +238,14 @@ void *loadZsetZiplistObject(unsigned char* zl, unsigned int *rlen) {
     len = ziplistLen (zl);
     eptr = ziplistIndex(zl,0);
     sptr = ziplistNext(zl,eptr);
-    sds *results = (sds *) zmalloc(len* 2 * sizeof(sds));
     if(rdb_version < 2) {
         *rlen = len * 2;
     } else {
         *rlen = len;
     }
+    sds *results = zmalloc(*rlen * sizeof(sds));
     while (eptr != NULL) {
+        score = zzlGetScore(sptr);
         ziplistGet(eptr,&vstr,&vlen,&vlong);
         if (vstr == NULL)
             ele = sdsfromlonglong(vlong);
@@ -254,7 +255,6 @@ void *loadZsetZiplistObject(unsigned char* zl, unsigned int *rlen) {
         buf_len = snprintf(buf, 128, "%f", score);
         results[i+1] = sdsnewlen(buf, buf_len);
         i += 2;
-        score = zzlGetScore(sptr);
         zzlNext(zl,&eptr,&sptr);
     }
 
@@ -265,7 +265,7 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
     unsigned int i, j, len;
     int buf_len;
     sds ele;
-    sds *results;
+    sds *results = NULL;
     char buf[128];
 
     if(type == REDIS_STRING) {
@@ -307,12 +307,13 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         double score;
         j = 0;    
         if ((zsetlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
+
         if(rdb_version < 2) {
             *rlen = zsetlen * 2;
         } else {
             *rlen = zsetlen;
         }
-        results = zmalloc( zsetlen * 2 * sizeof(*results));
+        results = zmalloc( *rlen * sizeof(*results));
         while(zsetlen--) {
             if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
             if (rdbLoadDoubleValue(fp,&score) == -1) return NULL;
@@ -331,7 +332,7 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         sds key, val;
         j = 0;
         *rlen = hashlen * 2;
-        results = zmalloc(hashlen * 2 * sizeof(*results));
+        results = zmalloc(*rlen * sizeof(*results));
         while(hashlen--) {
             if ((key = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
             if ((val = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
@@ -350,20 +351,23 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         switch(type) {
             case REDIS_HASH_ZIPMAP:
                 parser_stats.parse_num[HASH] += 1;
-                return loadHashZipMapObject((unsigned char*)aux, rlen);
+                results = loadHashZipMapObject((unsigned char*)aux, rlen);
+                break;
             case REDIS_LIST_ZIPLIST:
                 parser_stats.parse_num[LIST] += 1;
-                return loadListZiplistObject((unsigned char *)aux, rlen);
+                results = loadListZiplistObject((unsigned char *)aux, rlen);
+                break;
             case REDIS_SET_INTSET:
                 parser_stats.parse_num[SET] += 1;
-                return loadSetIntsetObject((unsigned char *)aux, rlen);
+                results = loadSetIntsetObject((unsigned char *)aux, rlen);
+                break;
             case REDIS_ZSET_ZIPLIST:
                 parser_stats.parse_num[ZSET] += 1;
-                return loadZsetZiplistObject((unsigned char *)aux, rlen);
+                results = loadZsetZiplistObject((unsigned char *)aux, rlen);
+                break;
         }
         sdsfree(aux);
-
-        return NULL;
+        return results;
     } else {
         parsePanic("Unknown object type");
     }
