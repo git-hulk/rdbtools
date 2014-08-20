@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
 
     /* start parse rdb file. */
     printf("--------------------------------------------RDB PARSER------------------------------------------\n");
-    parse_result = rdb_parse(rdbFile, userHandler);
+    parse_result = rdbParse(rdbFile, userHandler);
     printf("--------------------------------------------RDB PARSER------------------------------------------\n");
     if(parse_result == PARSE_OK && dumpParseInfo) {
         dumpParserInfo(); 

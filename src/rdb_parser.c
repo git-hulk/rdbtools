@@ -23,56 +23,56 @@ static parserStats parser_stats;
 /* record check sum */
 static long long digest = 0;
 
-size_t fread_check(void *ptr, size_t size, size_t nmemb, FILE *stream)
+static size_t freadCheck(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
     size_t len = fread(ptr, size, nmemb, stream);
     digest = crc64(digest, (unsigned char*)ptr, size*len);
     return len; 
 }
 
-int rdbLoadType(FILE *fp) {
+static int rdbLoadType(FILE *fp) {
     unsigned char type;
-    if (fread_check(&type,1,1,fp) == 0) return -1;
+    if (freadCheck(&type,1,1,fp) == 0) return -1;
     return type;
 }
 
-long long rdbLoadTime(FILE *fp) {
+static long long rdbLoadTime(FILE *fp) {
     if (rdb_version < 5) {
         int32_t t32;
-        if (fread_check(&t32,4,1,fp) == 0) return -1;
+        if (freadCheck(&t32,4,1,fp) == 0) return -1;
         return (long long) t32;
     } else {
         int64_t t64;
-        if (fread_check(&t64,8,1,fp) == 0) return -1;
+        if (freadCheck(&t64,8,1,fp) == 0) return -1;
         return (long long) t64;
     }
 }
 
 /* For information about double serialization check rdbSaveDoubleValue() */
-int rdbLoadDoubleValue(FILE *fp, double *val) {
+static int rdbLoadDoubleValue(FILE *fp, double *val) {
     char buf[256];
     unsigned char len;
 
-    if (fread_check(&len,1,1,fp) == 0) return -1;
+    if (freadCheck(&len,1,1,fp) == 0) return -1;
     switch(len) {
         case 255: *val = R_NegInf; return 0;
         case 254: *val = R_PosInf; return 0;
         case 253: *val = R_Nan; return 0;
         default:
-                  if (fread_check(buf,len,1,fp) == 0) return -1;
+                  if (freadCheck(buf,len,1,fp) == 0) return -1;
                   buf[len] = '\0';
                   sscanf(buf, "%lg", val);
                   return 0;
     }
 }
 
-uint32_t rdbLoadLen(FILE *fp, int *isencoded) {
+static uint32_t rdbLoadLen(FILE *fp, int *isencoded) {
     unsigned char buf[2];
     uint32_t len;
     int type;
 
     if (isencoded) *isencoded = 0;
-    if (fread_check(buf,1,1,fp) == 0) return REDIS_RDB_LENERR;
+    if (freadCheck(buf,1,1,fp) == 0) return REDIS_RDB_LENERR;
     type = (buf[0]&0xC0)>>6;
     if (type == REDIS_RDB_6BITLEN) {
         /* Read a 6 bit len */
@@ -83,31 +83,31 @@ uint32_t rdbLoadLen(FILE *fp, int *isencoded) {
         return buf[0]&0x3F;
     } else if (type == REDIS_RDB_14BITLEN) {
         /* Read a 14 bit len */
-        if (fread_check(buf+1,1,1,fp) == 0) return REDIS_RDB_LENERR;
+        if (freadCheck(buf+1,1,1,fp) == 0) return REDIS_RDB_LENERR;
         return ((buf[0]&0x3F)<<8)|buf[1];
     } else {
         /* Read a 32 bit len */
-        if (fread_check(&len,4,1,fp) == 0) return REDIS_RDB_LENERR;
+        if (freadCheck(&len,4,1,fp) == 0) return REDIS_RDB_LENERR;
         return ntohl(len);
     }
 }
 
-sds rdbLoadIntegerObject(FILE *fp, int enctype, int encode) {
+static sds rdbLoadIntegerObject(FILE *fp, int enctype, int encode) {
     unsigned char enc[4];
     long long val;
 
     encode = -1; /* unsed */
     if (enctype == REDIS_RDB_ENC_INT8) {
-        if (fread_check(enc,1,1,fp) == 0) return NULL;
+        if (freadCheck(enc,1,1,fp) == 0) return NULL;
         val = (signed char)enc[0];
     } else if (enctype == REDIS_RDB_ENC_INT16) {
         uint16_t v;
-        if (fread_check(enc,2,1,fp) == 0) return NULL;
+        if (freadCheck(enc,2,1,fp) == 0) return NULL;
         v = enc[0]|(enc[1]<<8);
         val = (int16_t)v;
     } else if (enctype == REDIS_RDB_ENC_INT32) {
         uint32_t v;
-        if (fread_check(enc,4,1,fp) == 0) return NULL;
+        if (freadCheck(enc,4,1,fp) == 0) return NULL;
         v = enc[0]|(enc[1]<<8)|(enc[2]<<16)|(enc[3]<<24);
         val = (int32_t)v;
     } else {
@@ -117,7 +117,7 @@ sds rdbLoadIntegerObject(FILE *fp, int enctype, int encode) {
     return sdsfromlonglong(val);
 }
 
-sds rdbLoadLzfStringObject(FILE*fp) {
+static sds rdbLoadLzfStringObject(FILE*fp) {
     unsigned int len, clen;
     unsigned char *c = NULL;
     sds val = NULL;
@@ -126,7 +126,7 @@ sds rdbLoadLzfStringObject(FILE*fp) {
     if ((len = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
     if ((c = zmalloc(clen)) == NULL) goto err;
     if ((val = sdsnewlen(NULL,len)) == NULL) goto err;
-    if (fread_check(c,clen,1,fp) == 0) goto err;
+    if (freadCheck(c,clen,1,fp) == 0) goto err;
     if (lzf_decompress(c,clen,val,len) == 0) goto err;
     zfree(c);
     return val;
@@ -136,7 +136,7 @@ err:
     return NULL;
 }
 
-sds rdbGenericLoadStringObject(FILE*fp, int encode) {
+static sds rdbGenericLoadStringObject(FILE*fp, int encode) {
     int isencoded;
     uint32_t len; 
     sds val; 
@@ -157,23 +157,23 @@ sds rdbGenericLoadStringObject(FILE*fp, int encode) {
 
     if (len == REDIS_RDB_LENERR) return NULL;
     val = sdsnewlen(NULL,len);
-    if (len && fread_check(val,len,1,fp) == 0) { 
+    if (len && freadCheck(val,len,1,fp) == 0) { 
         sdsfree(val);
         return NULL;
     }    
     return val; 
 }
 
-sds rdbLoadEncodedStringObject(FILE *fp) {
+static sds rdbLoadEncodedStringObject(FILE *fp) {
     return rdbGenericLoadStringObject(fp,1);
 }
 
-sds rdbLoadStringObject(FILE *fp) {
+static sds rdbLoadStringObject(FILE *fp) {
     return rdbGenericLoadStringObject(fp,0);
 }
 
 /* load value which hash encoding with zipmap. */
-void *loadHashZipMapObject(unsigned char* zm, unsigned int *rlen) {
+static void *loadHashZipMapObject(unsigned char* zm, unsigned int *rlen) {
     unsigned char *key, *val, *p;
     unsigned int klen, vlen, len, i = 0;
 
@@ -189,7 +189,7 @@ void *loadHashZipMapObject(unsigned char* zm, unsigned int *rlen) {
     return results;
 }
 
-void *loadListZiplistObject(unsigned char* zl, unsigned int *rlen) {
+static void *loadListZiplistObject(unsigned char* zl, unsigned int *rlen) {
     unsigned int i = 0,len;
     listTypeIterator *li;
     listTypeEntry entry;
@@ -206,7 +206,7 @@ void *loadListZiplistObject(unsigned char* zl, unsigned int *rlen) {
     return results;
 }
 
-void* loadSetIntsetObject(unsigned char* sl, unsigned int *rlen) {
+static void* loadSetIntsetObject(unsigned char* sl, unsigned int *rlen) {
     int64_t intele;
     unsigned int i = 0, len;
 
@@ -224,7 +224,7 @@ void* loadSetIntsetObject(unsigned char* sl, unsigned int *rlen) {
     return results;
 }
 
-void *loadZsetZiplistObject(unsigned char* zl, unsigned int *rlen) {
+static void *loadZsetZiplistObject(unsigned char* zl, unsigned int *rlen) {
     unsigned int i = 0, len;
     unsigned char *eptr, *sptr;
     unsigned char *vstr;
@@ -261,7 +261,7 @@ void *loadZsetZiplistObject(unsigned char* zl, unsigned int *rlen) {
     return results;
 }
 
-void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
+static void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
     unsigned int i, j, len;
     int buf_len;
     sds ele;
@@ -373,7 +373,7 @@ void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
     }
 }
 
-void start_parse(FILE *fp) {
+static void startParse(FILE *fp) {
     int i;
     struct stat sb;
     parser_stats.start_time = time(NULL);
@@ -388,11 +388,11 @@ void start_parse(FILE *fp) {
     }
 }
 
-void parse_progress(off_t pos) {
+void parseProgress(off_t pos) {
     parser_stats.parsed_bytes = pos;
 }
 
-int rdb_parse(char *rdbFile, keyValueHandler handler) {
+int rdbParse(char *rdbFile, keyValueHandler handler) {
     int type, loops = 0, dbid, valType;
     unsigned int rlen;
     char buf[1024];
@@ -411,7 +411,7 @@ int rdb_parse(char *rdbFile, keyValueHandler handler) {
         return PARSE_ERR;
     }
 
-    if (fread_check(buf, 9, 1, fp) == 0) {
+    if (freadCheck(buf, 9, 1, fp) == 0) {
         fclose(fp);
         fprintf(stderr, "fread err :%s\n", strerror(errno));
         return PARSE_ERR;
@@ -429,11 +429,11 @@ int rdb_parse(char *rdbFile, keyValueHandler handler) {
         return PARSE_ERR;
     }
 
-    start_parse(fp);
+    startParse(fp);
     while(1) {
         if(!(loops++ % 1000)) {
             /* record parse progress every 1000 loops. */
-            parse_progress(ftello(fp));
+            parseProgress(ftello(fp));
         }
         if((type = rdbLoadType(fp)) == -1) return PARSE_ERR;
 

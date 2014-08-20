@@ -32,6 +32,6 @@ typedef struct {
 
 typedef void* keyValueHandler (int type, void *key, void *val,unsigned int vlen,time_t expiretime);
 void dumpParserInfo();
-int rdb_parse(char *rdbFile, keyValueHandler handler);
+int rdbParse(char *rdbFile, keyValueHandler handler);
 
 #endif
