@@ -57,3 +57,5 @@ void* keyValueHandler(int type, void *key, void *val, unsigned int vlen, time_t 
 
 #### 6. contact me?
 > hulk.website@gmail.com
+
+any bugs? send mail, and I will appreciate your help.
