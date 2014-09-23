@@ -26,7 +26,7 @@ rdb_tools
 ```shell
 $ cd rdb_tools # (or rdb_tools/src)
 $ make # and will be a binary file named rdb-parser in src.
-$ ./rdb-parser -d -f dump.rdb # start parse
+$ ./rdb-parser -d -f ../tests/dump2.4.rdb
 ```
 
 #### 4. how to define user's handle for differnt data type.
