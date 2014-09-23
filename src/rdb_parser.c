@@ -36,8 +36,8 @@ static int rdbLoadType(FILE *fp) {
     return type;
 }
 
-static long long rdbLoadTime(FILE *fp) {
-    if (rdb_version < 5) {
+static long long rdbLoadTime(FILE *fp, int ms) {
+    if (!ms) {
         int32_t t32;
         if (freadCheck(&t32,4,1,fp) == 0) return -1;
         return (long long) t32;
@@ -367,8 +367,8 @@ static void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
             type == REDIS_LIST_ZIPLIST ||
             type == REDIS_SET_INTSET ||
             type == REDIS_ZSET_ZIPLIST ||
-            type == REDIS_RDB_TYPE_HASH_ZIPLIST ||
-            type == REDIS_LSET) {
+            type == REDIS_RDB_TYPE_HASH_ZIPLIST
+                ) {
         sds aux = rdbLoadStringObject(fp); 
         switch(type) {
             /* redis < 2.4 */
@@ -424,7 +424,7 @@ int rdbParse(char *rdbFile, keyValueHandler handler) {
     int type, loops = 0, dbid, valType;
     unsigned int rlen;
     char buf[1024];
-    time_t expiretime = -1;
+    long long expiretime;
     FILE *fp;
     sds key, sval; /* sval is simple string value.*/
     sds *cval; /*complicatae value*/
@@ -463,12 +463,19 @@ int rdbParse(char *rdbFile, keyValueHandler handler) {
             /* record parse progress every 1000 loops. */
             parseProgress(ftello(fp));
         }
+
+        expiretime = -1;
         if((type = rdbLoadType(fp)) == -1) return PARSE_ERR;
 
-        if(type == REDIS_EXPIRETIME) {
-            if ((expiretime = rdbLoadTime(fp)) == -1) return PARSE_ERR;
+        if(type == REDIS_RDB_OPCODE_EXPIRETIME) {
+            if ((expiretime = rdbLoadTime(fp, 0)) == -1) return PARSE_ERR;
+            if((type = rdbLoadType(fp)) == -1) return PARSE_ERR;
+            expiretime *= 1000;
+        } else if (type == REDIS_RDB_OPCODE_EXPIRETIME_MS) {
+            if ((expiretime = rdbLoadTime(fp, 1)) == -1) return PARSE_ERR;
             if((type = rdbLoadType(fp)) == -1) return PARSE_ERR;
         }
+
         /* file end. */
         if(type == REDIS_EOF) {
             break;
