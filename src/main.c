@@ -18,24 +18,24 @@ void _parsePanic(char *msg, char *file, int line) {
 void* userHandler (int type, void *key, void *val, unsigned int vlen, long long expiretime) {
     unsigned int i;
     if(type == REDIS_STRING) {
-        printf("STRING\t%lld\t%s\t%s\n", expiretime, (char *)key, (char *)val);
+        printf("STRING\t%lld ms\t%s\t%s\n", expiretime, (char *)key, (char *)val);
     } else if (type == REDIS_SET) {
         sds *res = (sds *)val;
-        printf("SET\t%lld\t%s\t[", expiretime, (char *)key);
+        printf("SET\t%lld ms\t%s\t[", expiretime, (char *)key);
         for(i = 0; i < vlen; i++) {
             printf("%s, ", res[i]);
         }
         printf("]\n");
     } else if(type == REDIS_LIST) {
         sds *res = (sds *)val;
-        printf("LIST\t%lld\t%s\t[", expiretime, (char *)key);
+        printf("LIST\t%lld ms\t%s\t[", expiretime, (char *)key);
         for(i = 0; i < vlen; i++) {
             printf("%s, ", res[i]);
         }
         printf("]\n");
     } else if(type == REDIS_ZSET) { 
         sds *res = (sds *)val;
-        printf("ZSET\t%lld\t%s\t", expiretime, (char *)key);
+        printf("ZSET\t%lld ms\t%s\t", expiretime, (char *)key);
         for(i = 0; i < vlen; i += 2) {
             printf("(%s,", res[i]);
             printf("%s), ", res[i+1]);
@@ -44,7 +44,7 @@ void* userHandler (int type, void *key, void *val, unsigned int vlen, long long 
 
     } else if(type == REDIS_HASH) {
         sds *res = (sds *)val;
-        printf("HASH\t%lld\t%s\t", expiretime, (char *)key);
+        printf("HASH\t%lld ms\t%s\t", expiretime, (char *)key);
         for(i = 0; i < vlen; i += 2) {
             printf("(%s, ", res[i]);
             printf("%s), ", res[i+1]);
