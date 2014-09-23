@@ -19,11 +19,18 @@
 #include <stdlib.h>
 #include "zmalloc.h"
 #include "sds.h"
-#include "fmacros.h"
-#include "intset.h"                     
-#include "ziplist.h"                    
-#include "zipmap.h"                     
 #include "lzf.h"
+
+#define _BSD_SOURCE
+
+#if defined(__linux__) || defined(__OpenBSD__)
+#define _XOPEN_SOURCE 700
+#else
+#define _XOPEN_SOURCE
+#endif
+
+#define _LARGEFILE_SOURCE
+#define _FILE_OFFSET_BITS 64
 
 #define _FILE_OFFSET_BITS 64
 #define PARSE_ERR -1
@@ -99,4 +106,9 @@ typedef struct {
     int ii; /* intset iterator */
 } setTypeIterator;
 
+typedef struct intset {
+    uint32_t encoding;
+    uint32_t length;
+    int8_t contents[];
+} intset;
 #endif
