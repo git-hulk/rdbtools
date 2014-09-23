@@ -28,4 +28,10 @@ unsigned char *ziplistNext(unsigned char *zl, unsigned char *p);
 unsigned char *ziplistPrev(unsigned char *zl, unsigned char *p);
 unsigned int ziplistGet(unsigned char *p, unsigned char **sval, unsigned int *slen, long long *lval);
 unsigned int ziplistLen(unsigned char *zl);
+
+hashTypeIterator *hashTypeInitIterator(unsigned char *subject); 
+void hashTypeReleaseIterator(hashTypeIterator *hi);
+int hashTypeNext(hashTypeIterator *hi);
+void hashTypeCurrentFromZiplist(hashTypeIterator *hi, int what, unsigned char **vstr,  unsigned int *vlen, long long *vll);
+sds hashTypeCurrentObject(hashTypeIterator *hi, int what);
 #endif

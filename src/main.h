@@ -32,10 +32,11 @@
 #define _LARGEFILE_SOURCE
 #define _FILE_OFFSET_BITS 64
 
-#define _FILE_OFFSET_BITS 64
 #define PARSE_ERR -1
 #define PARSE_OK 0
 
+#define REDIS_RDB_OPCODE_EXPIRETIME_MS 252
+#define REDIS_RDB_OPCODE_EXPIRETIME 253
 #define REDIS_EXPIRETIME 253
 #define REDIS_SELECTDB 254
 #define REDIS_EOF 255
@@ -61,12 +62,12 @@
 #define REDIS_SET 2
 #define REDIS_ZSET 3
 #define REDIS_HASH 4
-#define REDIS_LSET 5
 
 #define REDIS_HASH_ZIPMAP 9
 #define REDIS_LIST_ZIPLIST 10
 #define REDIS_SET_INTSET 11
 #define REDIS_ZSET_ZIPLIST 12
+#define REDIS_RDB_TYPE_HASH_ZIPLIST  13
 
 #define REDIS_ENCODING_RAW 0     /* Raw representation */
 #define REDIS_ENCODING_INT 1     /* Encoded as integer */
@@ -80,6 +81,9 @@
 
 #define REDIS_HEAD 0
 #define REDIS_TAIL 1
+
+#define REDIS_HASH_KEY 1
+#define REDIS_HASH_VALUE 2
 enum BOOL_TYPE {FALSE, TRUE};
 typedef enum BOOL_TYPE BOOL;
 
@@ -92,6 +96,12 @@ typedef struct {
     unsigned char direction; /* Iteration direction */
     unsigned char *zi; 
 } listTypeIterator;
+
+typedef struct {
+    unsigned char *subject;
+    int encoding;
+    unsigned char *fptr, *vptr;
+} hashTypeIterator; 
 
 /* Structure for an entry while iterating over a list. */
 typedef struct {

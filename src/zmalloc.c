@@ -32,7 +32,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include "config.h"
 #include "zmalloc.h"
 
 #ifdef HAVE_MALLOC_SIZE
