@@ -172,6 +172,7 @@ static sds rdbLoadStringObject(FILE *fp) {
     return rdbGenericLoadStringObject(fp,0);
 }
 
+
 /* load value which hash encoding with zipmap. */
 static void *loadHashZipMapObject(unsigned char* zm, unsigned int *rlen) {
     unsigned char *key, *val, *p;
@@ -185,6 +186,26 @@ static void *loadHashZipMapObject(unsigned char* zm, unsigned int *rlen) {
         results[i] = sdsnewlen(key, klen);
         results[i+1] = sdsnewlen(val, vlen);
         i += 2;
+    }
+    return results;
+}
+
+static void *loadHashZiplistObject(unsigned char* zl, unsigned int *rlen) {
+    unsigned int i = 0,len;
+    sds *results;
+    sds field, value;
+    hashTypeIterator *hi;
+
+    len = ziplistLen(zl);
+    *rlen = len;
+    results = (sds *) zmalloc(len * sizeof(sds));
+
+    hi = hashTypeInitIterator(zl);
+    while (hashTypeNext(hi)) {
+        field = hashTypeCurrentObject(hi, REDIS_HASH_KEY); 
+        value = hashTypeCurrentObject(hi, REDIS_HASH_VALUE);
+        results[i++] = field;
+        results[i++] = value;
     }
     return results;
 }
@@ -346,9 +367,11 @@ static void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
             type == REDIS_LIST_ZIPLIST ||
             type == REDIS_SET_INTSET ||
             type == REDIS_ZSET_ZIPLIST ||
+            type == REDIS_RDB_TYPE_HASH_ZIPLIST ||
             type == REDIS_LSET) {
         sds aux = rdbLoadStringObject(fp); 
         switch(type) {
+            /* redis < 2.4 */
             case REDIS_HASH_ZIPMAP:
                 parser_stats.parse_num[HASH] += 1;
                 results = loadHashZipMapObject((unsigned char*)aux, rlen);
@@ -365,6 +388,11 @@ static void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
                 parser_stats.parse_num[ZSET] += 1;
                 results = loadZsetZiplistObject((unsigned char *)aux, rlen);
                 break;
+            case REDIS_RDB_TYPE_HASH_ZIPLIST:
+                parser_stats.parse_num[HASH] += 1;
+                results = loadHashZiplistObject((unsigned char *)aux, rlen);
+                break;
+                
         }
         sdsfree(aux);
         return results;
@@ -456,7 +484,7 @@ int rdbParse(char *rdbFile, keyValueHandler handler) {
             return PARSE_ERR;
         } 
 
-        if(type == REDIS_HASH_ZIPMAP) {
+        if(type == REDIS_HASH_ZIPMAP || type == REDIS_RDB_TYPE_HASH_ZIPLIST) {
             valType = REDIS_HASH;
         } else if(type == REDIS_LIST_ZIPLIST) {
             valType = REDIS_LIST;

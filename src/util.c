@@ -382,14 +382,25 @@ uint8_t intsetGet(intset *is, uint32_t pos, int64_t *value) {
 #define ZIP_STR_06B (0 << 6)
 #define ZIP_STR_14B (1 << 6)
 #define ZIP_STR_32B (2 << 6)
-#define ZIP_INT_8B (0xfe)
 #define ZIP_INT_16B (0xc0 | 0<<4)
 #define ZIP_INT_32B (0xc0 | 1<<4)
 #define ZIP_INT_64B (0xc0 | 2<<4)
+#define ZIP_INT_24B (0xc0 | 3<<4)
+#define ZIP_INT_8B 0xfe
+/* 4 bit integer immediate encoding */
+#define ZIP_INT_IMM_MASK 0x0f
+#define ZIP_INT_IMM_MIN 0xf1    /* 11110001 */
+#define ZIP_INT_IMM_MAX 0xfd    /* 11111101 */
+#define ZIP_INT_IMM_VAL(v) (v & ZIP_INT_IMM_MASK)
+
+#define INT24_MAX 0x7fffff
+#define INT24_MIN (-INT24_MAX - 1)
 
 /* Macro's to determine type */
 #define ZIP_IS_STR(enc) (((enc) & 0xc0) < 0xc0)
 #define ZIP_IS_INT(enc) (!ZIP_IS_STR(enc) && ((enc) & 0x30) < 0x30)
+#define ZIP_STR_MASK 0xc0
+#define ZIP_INT_MASK 0x30
 
 /* Utility macros */
 #define ZIPLIST_BYTES(zl)       (*((uint32_t*)(zl)))
@@ -400,10 +411,65 @@ uint8_t intsetGet(intset *is, uint32_t pos, int64_t *value) {
 #define ZIPLIST_ENTRY_TAIL(zl)  ((zl)+ZIPLIST_TAIL_OFFSET(zl))
 #define ZIPLIST_ENTRY_END(zl)   ((zl)+ZIPLIST_BYTES(zl)-1)
 
+/* Extract the encoding from the byte pointed by 'ptr' and set it into
+ *  * 'encoding'. */
+#define ZIP_ENTRY_ENCODING(ptr, encoding) do {  \
+    (encoding) = (ptr[0]); \
+        if ((encoding) < ZIP_STR_MASK) (encoding) &= ZIP_STR_MASK; \
+} while(0)
 /* We know a positive increment can only be 1 because entries can only be
  * pushed one at a time. */
 #define ZIPLIST_INCR_LENGTH(zl,incr) { \
     if (ZIPLIST_LENGTH(zl) < UINT16_MAX) ZIPLIST_LENGTH(zl)+=incr; }
+
+
+/* Decode the length encoded in 'ptr'. The 'encoding' variable will hold the
+ *  * entries encoding, the 'lensize' variable will hold the number of bytes
+ *   * required to encode the entries length, and the 'len' variable will hold the
+ *    * entries length. */
+#define ZIP_DECODE_LENGTH(ptr, encoding, lensize, len) do {                    \
+    ZIP_ENTRY_ENCODING((ptr), (encoding));                                     \
+    if ((encoding) < ZIP_STR_MASK) {                                           \
+        if ((encoding) == ZIP_STR_06B) {                                       \
+            (lensize) = 1;                                                     \
+            (len) = (ptr)[0] & 0x3f;                                           \
+        } else if ((encoding) == ZIP_STR_14B) {                                \
+            (lensize) = 2;                                                     \
+            (len) = (((ptr)[0] & 0x3f) << 8) | (ptr)[1];                       \
+        } else if (encoding == ZIP_STR_32B) {                                  \
+            (lensize) = 5;                                                     \
+            (len) = ((ptr)[1] << 24) |                                         \
+            ((ptr)[2] << 16) |                                         \
+            ((ptr)[3] <<  8) |                                         \
+            ((ptr)[4]);                                                \
+        } else {                                                               \
+            assert(NULL);                                                      \
+        }                                                                      \
+    } else {                                                                   \
+        (lensize) = 1;                                                         \
+        (len) = zipIntSize(encoding);                                          \
+    }                                                                          \
+} while(0);
+
+#define ZIP_DECODE_PREVLENSIZE(ptr, prevlensize) do {                          \
+    if ((ptr)[0] < ZIP_BIGLEN) {                                               \
+        (prevlensize) = 1;                                                     \
+    } else {                                                                   \
+        (prevlensize) = 5;                                                     \
+    }                                                                          \
+} while(0);
+/* Decode the length of the previous element, from the perspective of the entry
+ *  * pointed to by 'ptr'. */
+#define ZIP_DECODE_PREVLEN(ptr, prevlensize, prevlen) do {                     \
+    ZIP_DECODE_PREVLENSIZE(ptr, prevlensize);                                  \
+    if ((prevlensize) == 1) {                                                  \
+        (prevlen) = (ptr)[0];                                                  \
+    } else if ((prevlensize) == 5) {                                           \
+        assert(sizeof((prevlensize)) == 4);                                    \
+        memcpy(&(prevlen), ((char*)(ptr)) + 1, 4);                             \
+        memrev32ifbe(&prevlen);                                                \
+    }                                                                          \
+} while(0);
 
 typedef struct zlentry {
     unsigned int prevrawlensize, prevrawlen;
@@ -415,29 +481,23 @@ typedef struct zlentry {
 
 static zlentry zipEntry(unsigned char *p);
 
-/* Return the encoding pointer to by 'p'. */
-static unsigned int zipEntryEncoding(unsigned char *p) {
-    /* String encoding: 2 MSBs */
-    unsigned char b = p[0] & 0xc0;
-    if (b < 0xc0) {
-        return b;
-    } else {
-        /* Integer encoding: 4 MSBs */
-        return p[0] & 0xf0;
-    }
-    assert(NULL);
-    return 0;
-}
-
 /* Read integer encoded as 'encoding' from 'p' */
 static int64_t zipLoadInteger(unsigned char *p, unsigned char encoding) {
     int16_t i16;
     int32_t i32;
     int64_t i64, ret = 0;
-    if (encoding == ZIP_INT_16B) {
+
+    if (encoding == ZIP_INT_8B) {
+        ret = ((int8_t*)p)[0];
+    } else if (encoding == ZIP_INT_16B) {
         memcpy(&i16,p,sizeof(i16));
         memrev16ifbe(&i16);
         ret = i16;
+    } else if (encoding == ZIP_INT_24B) {
+        i32 = 0; 
+        memcpy(((uint8_t*)&i32)+1,p,sizeof(i32)-sizeof(uint8_t));
+        memrev32ifbe(&i32);
+        ret = i32>>8;
     } else if (encoding == ZIP_INT_32B) {
         memcpy(&i32,p,sizeof(i32));
         memrev16ifbe(&i32);
@@ -446,6 +506,8 @@ static int64_t zipLoadInteger(unsigned char *p, unsigned char encoding) {
         memcpy(&i64,p,sizeof(i64));
         memrev16ifbe(&i64);
         ret = i64;
+    } else if (encoding >= ZIP_INT_IMM_MIN && encoding <= ZIP_INT_IMM_MAX) {
+        ret = (encoding & ZIP_INT_IMM_MASK)-1;
     } else {
         assert(NULL);
     }
@@ -478,74 +540,36 @@ unsigned int ziplistGet(unsigned char *p, unsigned char **sstr, unsigned int *sl
 
 static unsigned int zipIntSize(unsigned char encoding) {
     switch(encoding) {
-        case ZIP_INT_8B:  return sizeof(int8_t);
-        case ZIP_INT_16B: return sizeof(int16_t);
-        case ZIP_INT_32B: return sizeof(int32_t);
-        case ZIP_INT_64B: return sizeof(int64_t);
+    case ZIP_INT_8B:  return 1;
+    case ZIP_INT_16B: return 2;
+    case ZIP_INT_24B: return 3;
+    case ZIP_INT_32B: return 4;
+    case ZIP_INT_64B: return 8;
         default: return 0;
     }
     assert(NULL);
     return 0;
 }
 
-/* Decode the encoded length pointed by 'p'. If a pointer to 'lensize' is
- * provided, it is set to the number of bytes required to encode the length. */
-static unsigned int zipDecodeLength(unsigned char *p, unsigned int *lensize) {
-    unsigned char encoding = zipEntryEncoding(p);
-    unsigned int len = 0;
-
-    if (ZIP_IS_STR(encoding)) {
-        switch(encoding) {
-        case ZIP_STR_06B:
-            len = p[0] & 0x3f;
-            if (lensize) *lensize = 1;
-            break;
-        case ZIP_STR_14B:
-            len = ((p[0] & 0x3f) << 8) | p[1];
-            if (lensize) *lensize = 2;
-            break;
-        case ZIP_STR_32B:
-            len = (p[1] << 24) | (p[2] << 16) | (p[3] << 8) | p[4];
-            if (lensize) *lensize = 5;
-            break;
-        default:
-            assert(NULL);
-        }
-    } else {
-        len = zipIntSize(encoding);
-        if (lensize) *lensize = 1;
-    }
-    return len;
-}
-
-/* Decode the length of the previous element stored at "p". */
-static unsigned int zipPrevDecodeLength(unsigned char *p, unsigned int *lensize) {
-    unsigned int len = *p;
-    if (len < ZIP_BIGLEN) {
-        if (lensize) *lensize = 1;
-    } else {
-        if (lensize) *lensize = 1+sizeof(len);
-        memcpy(&len,p+1,sizeof(len));
-        memrev32ifbe(&len);
-    }
-    return len;
-}
-
 /* Return a struct with all information about an entry. */
 static zlentry zipEntry(unsigned char *p) {
     zlentry e;
-    e.prevrawlen = zipPrevDecodeLength(p,&e.prevrawlensize);
-    e.len = zipDecodeLength(p+e.prevrawlensize,&e.lensize);
-    e.headersize = e.prevrawlensize+e.lensize;
-    e.encoding = zipEntryEncoding(p+e.prevrawlensize);
+
+    ZIP_DECODE_PREVLEN(p, e.prevrawlensize, e.prevrawlen);
+    ZIP_DECODE_LENGTH(p + e.prevrawlensize, e.encoding, e.lensize, e.len);
+    e.headersize = e.prevrawlensize + e.lensize;
     e.p = p;
     return e;
+
 }
 
 /* Return the total number of bytes used by the entry at "p". */
 static unsigned int zipRawEntryLength(unsigned char *p) {
-    zlentry e = zipEntry(p);
-    return e.headersize + e.len;
+    unsigned int prevlensize, encoding, lensize, len;
+    ZIP_DECODE_PREVLENSIZE(p, prevlensize);
+    ZIP_DECODE_LENGTH(p + prevlensize, encoding, lensize, len);
+    return prevlensize + lensize + len;
+
 }
 
 /* Returns an offset to use for iterating with ziplistNext. When the given
@@ -628,5 +652,83 @@ unsigned int ziplistLen(unsigned char *zl) {
         if (len < UINT16_MAX) ZIPLIST_LENGTH(zl) = len;
     }
     return len;
+}
+
+
+
+hashTypeIterator *hashTypeInitIterator(unsigned char *subject) {
+    hashTypeIterator *hi = zmalloc(sizeof(hashTypeIterator));
+    hi->subject = subject;
+    hi->fptr = NULL;
+    hi->vptr = NULL;
+
+    return hi; 
+}
+
+void hashTypeReleaseIterator(hashTypeIterator *hi) {
+    zfree(hi);
+}
+
+int hashTypeNext(hashTypeIterator *hi) {
+    unsigned char *zl;
+    unsigned char *fptr, *vptr;
+
+    zl = hi->subject;
+    fptr = hi->fptr;
+    vptr = hi->vptr;
+
+    if (fptr == NULL) {
+        /* Initialize cursor */
+        assert(vptr == NULL);
+        fptr = ziplistIndex(zl, 0);
+    } else {
+        /* Advance cursor */
+        assert(vptr != NULL);
+        fptr = ziplistNext(zl, vptr);
+    }
+    if (fptr == NULL) return 0; 
+
+    /* Grab pointer to the value (fptr points to the field) */
+    vptr = ziplistNext(zl, fptr);
+    assert(vptr != NULL);
+
+    /* fptr, vptr now point to the first or next pair */
+    hi->fptr = fptr;
+    hi->vptr = vptr;
+    return 1;
+}
+
+void hashTypeCurrentFromZiplist(hashTypeIterator *hi, int what,
+        unsigned char **vstr,
+        unsigned int *vlen,
+        long long *vll)
+{
+    int ret;
+
+    if (what & REDIS_HASH_KEY) {
+        ret = ziplistGet(hi->fptr, vstr, vlen, vll);
+        assert(ret);
+    } else {
+        ret = ziplistGet(hi->vptr, vstr, vlen, vll);
+        assert(ret);
+    }
+}
+
+sds hashTypeCurrentObject(hashTypeIterator *hi, int what) {
+    sds dst;
+
+    unsigned char *vstr = NULL;
+    unsigned int vlen = UINT_MAX;
+    long long vll = LLONG_MAX;
+
+    hashTypeCurrentFromZiplist(hi, what, &vstr, &vlen, &vll);
+    if (vstr) {
+        dst = sdsnewlen((char*)vstr,vlen);
+    } else {
+        dst = sdsfromlonglong(vll);
+    }
+
+
+    return dst;
 }
 

@@ -1,6 +1,6 @@
 objs = sds.o  endian.o  zmalloc.o  lzf_c.o lzf_d.o util.o rdb_parser.o main.o
 CC = gcc
-	CFLAGS = -g -std=c99 -pedantic -Wall -W -fPIC
+CFLAGS = -g -std=c99 -pedantic -Wall -W -fPIC 
 all: $(objs) 
 	@echo "--------------------------compile start here---------------------------------"
 	$(CC) $(CFLAGS) -o rdb-parser $(objs) 
@@ -19,6 +19,6 @@ util.o: util.c  main.h zmalloc.h sds.h   \
   lzf.h
 ziplist.o: ziplist.c zmalloc.h util.h main.h sds.h   \
    lzf.h endian.h
-zmalloc.o: zmalloc.c config.h zmalloc.h
+zmalloc.o: zmalloc.c zmalloc.h
 clean:
 	-rm *.o rdb-parser
