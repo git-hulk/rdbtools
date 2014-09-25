@@ -207,6 +207,7 @@ static void *loadHashZiplistObject(unsigned char* zl, unsigned int *rlen) {
         results[i++] = field;
         results[i++] = value;
     }
+    hashTypeReleaseIterator(hi);
     return results;
 }
 
