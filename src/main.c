@@ -67,14 +67,14 @@ int main(int argc, char **argv) {
     }
 
     int i, parse_result;
-    BOOL dumpParseInfo = FALSE;
+    bool dumpParseInfo = false;
     char *rdbFile;
     for(i = 1; i < argc; i++) {
         if(argc > i+1 && argv[i][0] == '-' && argv[i][1] == 'f') {
             i += 1;
             rdbFile = argv[i];
         } else if(argv[i][0] == '-' && argv[i][1] == 'd'){
-            dumpParseInfo = TRUE;
+            dumpParseInfo = true;
         }
     }
     if(!rdbFile) {

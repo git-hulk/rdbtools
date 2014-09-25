@@ -18,6 +18,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include "zmalloc.h"
+#include <stdbool.h>
 #include "sds.h"
 #include "lzf.h"
 
@@ -84,8 +85,6 @@
 
 #define REDIS_HASH_KEY 1
 #define REDIS_HASH_VALUE 2
-enum BOOL_TYPE {FALSE, TRUE};
-typedef enum BOOL_TYPE BOOL;
 
 void _parsePanic(char *msg, char *file, int line);
 #define parsePanic(_e) _parsePanic(#_e,__FILE__,__LINE__),_exit(1)
