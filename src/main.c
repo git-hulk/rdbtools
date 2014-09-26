@@ -43,15 +43,15 @@ void* userHandler (int type, void *key, void *val, unsigned int vlen, long long 
     V_NOT_USED(expiretime);
 
     if(type == REDIS_STRING) {
-        /* handle whici type is string */
+        /* handle which type is string */
     } else if (type == REDIS_SET) {
-        /* handle whici type is set */
+        /* handle which type is set */
     } else if(type == REDIS_LIST) {
-        /* handle whici type is list */
+        /* handle which type is list */
     } else if(type == REDIS_ZSET) { 
-        /* handle whici type is zset */
+        /* handle which type is zset */
     } else if(type == REDIS_HASH) {
-        /* handle whici type is hash */
+        /* handle which type is hash */
     }
     return NULL;
 }
