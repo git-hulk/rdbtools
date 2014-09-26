@@ -88,6 +88,7 @@
 
 void _parsePanic(char *msg, char *file, int line);
 #define parsePanic(_e) _parsePanic(#_e,__FILE__,__LINE__),_exit(1)
+#define V_NOT_USED(v) ((void)(v))
 
 typedef struct {
     unsigned char *subject;
