@@ -34,4 +34,5 @@ void hashTypeReleaseIterator(hashTypeIterator *hi);
 int hashTypeNext(hashTypeIterator *hi);
 void hashTypeCurrentFromZiplist(hashTypeIterator *hi, int what, unsigned char **vstr,  unsigned int *vlen, long long *vll);
 sds hashTypeCurrentObject(hashTypeIterator *hi, int what);
+void _parsePanic(char *msg, char *file, int line);
 #endif

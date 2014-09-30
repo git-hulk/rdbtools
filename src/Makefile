@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -g -std=c99 -pedantic -Wall -W -fPIC 
 all: $(objs) 
 	@echo "--------------------------compile start here---------------------------------"
-	$(CC) $(CFLAGS) -o rdb-parser $(objs) 
+	$(CC) $(CFLAGS) -o rtools $(objs) 
 	@echo "--------------------------compile  end  here---------------------------------"
 
 crc64.o: crc64.c
@@ -21,4 +21,4 @@ ziplist.o: ziplist.c zmalloc.h util.h main.h sds.h   \
    lzf.h endian.h
 zmalloc.o: zmalloc.c zmalloc.h
 clean:
-	-rm *.o rdb-parser
+	-rm *.o rtools

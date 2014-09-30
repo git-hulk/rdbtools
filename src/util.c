@@ -24,6 +24,21 @@
 #define ZIPLIST_HEAD 0
 #define ZIPLIST_TAIL 1
 
+/* Return the UNIX time in microseconds */
+long long ustime(void) {
+    struct timeval tv; 
+    long long ust;
+
+    gettimeofday(&tv, NULL);
+    ust = ((long long)tv.tv_sec)*1000000;
+    ust += tv.tv_usec;
+    return ust;
+}
+
+/* Return the UNIX time in milliseconds */
+long long mstime(void) {
+        return ustime()/1000;
+}
 
 /* Convert a long long into a string. Returns the number of
  * characters needed to represent the number, that can be shorter if passed
@@ -730,5 +745,14 @@ sds hashTypeCurrentObject(hashTypeIterator *hi, int what) {
 
 
     return dst;
+}
+
+void _parsePanic(char *msg, char *file, int line) {
+    fprintf(stderr,"!!! Software Failure. Press left mouse button to continue");
+    fprintf(stderr,"Guru Meditation: %s #%s:%d",msg,file,line);
+#ifdef HAVE_BACKTRACE
+    fprintf(stderr,"(forcing SIGSEGV in order to print the stack trace)");
+    *((char*)-1) = 'x';
+#endif
 }
 

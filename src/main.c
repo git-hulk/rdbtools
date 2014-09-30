@@ -6,15 +6,6 @@
 #include "main.h"
 #include "rdb_parser.h"
 
-void _parsePanic(char *msg, char *file, int line) {
-    fprintf(stderr,"!!! Software Failure. Press left mouse button to continue");
-    fprintf(stderr,"Guru Meditation: %s #%s:%d",msg,file,line);
-#ifdef HAVE_BACKTRACE
-    fprintf(stderr,"(forcing SIGSEGV in order to print the stack trace)");
-    *((char*)-1) = 'x';
-#endif
-}
-
 /**
  * when a key was parsed, this function would be called once.
  *
@@ -34,9 +25,10 @@ void _parsePanic(char *msg, char *file, int line) {
  *
  * Note: don't free key, val. As rdbtools would free them after call userHandler.
  */
-void* userHandler (int type, void *key, void *val, unsigned int vlen, long long expiretime) {
+void* userHandler (int db, int type, void *key, void *val, unsigned int vlen, long long expiretime) {
 
     /* I didn't use these vars in example, so mark as unused */
+    V_NOT_USED(db);
     V_NOT_USED(key);
     V_NOT_USED(val);
     V_NOT_USED(vlen);

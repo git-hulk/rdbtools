@@ -407,6 +407,8 @@ static void startParse(FILE *fp) {
     struct stat sb;
     parser_stats.start_time = time(NULL);
     parser_stats.parsed_bytes = 0;
+    parser_stats.key_num = 0;
+    parser_stats.expires_num = 0;
     if (fstat(fileno(fp), &sb) == -1) {
         parser_stats.total_bytes = 1;
     } else {
@@ -422,7 +424,7 @@ void parseProgress(off_t pos) {
 }
 
 int rdbParse(char *rdbFile, keyValueHandler handler) {
-    int type, loops = 0, dbid, valType;
+    int type, loops = 0, dbid=-1, valType;
     unsigned int rlen;
     char buf[1024];
     long long expiretime;
@@ -491,6 +493,10 @@ int rdbParse(char *rdbFile, keyValueHandler handler) {
         if ((key = rdbLoadStringObject(fp)) == NULL) {
             return PARSE_ERR;
         } 
+        if(expiretime != -1){
+            parser_stats.expires_num++;
+        }
+        parser_stats.key_num++;
 
         if(type == REDIS_HASH_ZIPMAP || type == REDIS_RDB_TYPE_HASH_ZIPLIST) {
             valType = REDIS_HASH;
@@ -506,10 +512,10 @@ int rdbParse(char *rdbFile, keyValueHandler handler) {
         /* load value. */
         if(type == REDIS_STRING) {
             sval = rdbLoadValueObject(fp, type, &rlen);
-            handler(valType, key, sval, rlen, expiretime);
+            handler(dbid, valType, key, sval, rlen, expiretime);
         } else {
             cval = rdbLoadValueObject(fp, type, &rlen);
-            handler(valType, key, cval, rlen, expiretime);
+            handler(dbid, valType, key, cval, rlen, expiretime);
         }
 
         /* clean*/
@@ -543,15 +549,10 @@ int rdbParse(char *rdbFile, keyValueHandler handler) {
 }
 
 void dumpParserInfo() {
-    long long total_nums = 0;
-    int i;
-    for(i = 0 ; i < TOTAL_DATA_TYPES; i++) {
-        total_nums += parser_stats.parse_num[i];
-    }
 
     printf("--------------------------------------------DUMP INFO------------------------------------------\n");
     printf("Parser parse %ld bytes  cost %ds.\n", (long) parser_stats.total_bytes, (int)((int)parser_stats.stop_time - (int)parser_stats.start_time));
-    printf("Total parse %lld keys\n", total_nums);
+    printf("Total parse total %lld keys, with %lld expires keys\n", parser_stats.key_num, parser_stats.expires_num);
     printf("\t%ld String keys\n", parser_stats.parse_num[STRING]);
     printf("\t%ld List keys\n", parser_stats.parse_num[LIST]);
     printf("\t%ld Set keys\n", parser_stats.parse_num[SET]);
