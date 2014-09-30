@@ -26,7 +26,7 @@ rdb_tools
 ```shell
 $ cd rdb_tools # (or rdb_tools/src)
 $ make # and will be a binary file named rdb-parser in src.
-$ ./rdb-parser -d -f ../tests/dump2.4.rdb
+$ ./rtools -f ../tests/dump2.4.rdb 
 ```
 
 #### 4. how to define user's handle for differnt data type.
@@ -35,7 +35,7 @@ $ ./rdb-parser -d -f ../tests/dump2.4.rdb
 ```c
 /*
  * user can define handler to different data type.
- 
+ * @db : db id; 
  * @param type: may be STRING, SET, LIST, ZSET, HASH 
  *    if type == STRING, val is sds.
  *    if type == SET, val is array and element type is sds. like ["1", "3", "7"]
@@ -49,7 +49,7 @@ $ ./rdb-parser -d -f ../tests/dump2.4.rdb
  * @ return any data as you like.
  */
  
-void* keyValueHandler(int type, void *key, void *val, unsigned int vlen, time_t expiretime);
+void* keyValueHandler(int db, int type, void *key, void *val, unsigned int vlen, long long expiretime);
 ```
 
 #### 5. test snapshot
@@ -58,8 +58,8 @@ void* keyValueHandler(int type, void *key, void *val, unsigned int vlen, time_t 
 #### 6. contact me?
 > ```Sina Weibo```: [@改名hulk](http://www.weibo.com/tianyi4)
 
->```     Gmail```: [hulk.website@gmail.com](mailto:hulk.website@gmail.com)
+>```Gmail```: [hulk.website@gmail.com](mailto:hulk.website@gmail.com)
 
->```      Blog```: [www.hulkdev.com](http://hulkdev.sinaapp.com)
+>```Blog```: [www.hulkdev.com](http://hulkdev.sinaapp.com)
 
 any bugs? send mail, and I will appreciate your help.

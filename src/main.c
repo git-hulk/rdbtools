@@ -3,12 +3,13 @@
  * author: @hulk 
  * date: 2014-08-13
  */
+#include <getopt.h>
 #include "main.h"
 #include "rdb_parser.h"
 
 /**
  * when a key was parsed, this function would be called once.
- *
+ * @db  : dbid 
  * @type: all are listed below example.
  * @key: key in redis db.
  * @val & @vlen: 
@@ -50,41 +51,64 @@ void* userHandler (int db, int type, void *key, void *val, unsigned int vlen, lo
 
 
 static void usage(void) {
-    fprintf(stderr, "Usage:\nrdb_parser -[f file] [d]\n");
+    fprintf(stderr, "USAGE: ./rtools [-f file] -V -h\n");
+    fprintf(stderr, "\t-V --version \n");
+    fprintf(stderr, "\t-h --help show usage \n");
     fprintf(stderr, "\t-f --file specify which rdb file would be parsed.\n");
-    fprintf(stderr, "\t-d --dump parser info, to dump parser stats info.\n");
-    fprintf(stderr, "\t Notice: This tool only test on redis 2.2 and 2.4, so it may be error in 2.4 later.\n");
+    fprintf(stderr, "\t Notice: This tool only test on redis 2.2 and 2.4, 2.6, 2.8.\n\n");
 }
 
 int main(int argc, char **argv) {
+    int c;
+    int parse_result;
+    char *rdbFile;
+    bool is_show_help, is_show_version;
+    char short_options [] = { "hVf:" };
+    struct option long_options[] = {
+         { "help", no_argument, NULL, 'h' }, /* help */
+         { "version", no_argument, NULL, 'V' }, /* version */
+         { "rdb-iile-path", required_argument,  NULL, 'f' }, /* rdb file path*/
+         { NULL, 0, NULL, 0  }
+    };
 
-    if(argc <= 1) {
-        usage();
-        exit(1);
+    for (;;) {
+        c = getopt_long(argc, argv, short_options, long_options, NULL);
+        if (c == -1) {
+            break;
+        }
+        switch (c) {
+            case 'h':
+                is_show_help = true;
+                break;
+            case 'V':
+                is_show_version = true;
+                break;
+            case 'f':
+                rdbFile = optarg;
+                break;
+            default:
+                exit(0);
+        }
     }
 
-    int i, parse_result;
-    bool dumpParseInfo = false;
-    char *rdbFile;
-    for(i = 1; i < argc; i++) {
-        if(argc > i+1 && argv[i][0] == '-' && argv[i][1] == 'f') {
-            i += 1;
-            rdbFile = argv[i];
-        } else if(argv[i][0] == '-' && argv[i][1] == 'd'){
-            dumpParseInfo = true;
-        }
+    if(is_show_version) {
+        fprintf(stderr, "\nHELLO, THIS RDB PARSER VERSION 1.0\n\n");
+    }
+    if(is_show_help) {
+        usage();
+    }
+    if(is_show_version || is_show_help) {
+        exit(0);
     }
     if(!rdbFile) {
         fprintf(stderr, "ERR: U must specify rdb file by option -f filepath.\n");
-        exit(1);
+        exit(0);
     }
 
     /* start parse rdb file. */
     printf("--------------------------------------------RDB PARSER------------------------------------------\n");
     parse_result = rdbParse(rdbFile, userHandler);
     printf("--------------------------------------------RDB PARSER------------------------------------------\n");
-    if(parse_result == PARSE_OK && dumpParseInfo) {
-        dumpParserInfo(); 
-    }
+    dumpParserInfo(); 
     return 0;
 }
