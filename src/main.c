@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     int c;
     int parse_result;
     char *rdbFile;
-    bool is_show_help, is_show_version;
+    bool is_show_help = false, is_show_version = false;
     char short_options [] = { "hVf:" };
     struct option long_options[] = {
          { "help", no_argument, NULL, 'h' }, /* help */
