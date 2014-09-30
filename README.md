@@ -56,6 +56,10 @@ void* keyValueHandler(int type, void *key, void *val, unsigned int vlen, time_t 
 ![image](https://github.com/git-hulk/rdbtools/blob/master/snapshot/rdb-tools.png)
 
 #### 6. contact me?
-> hulk.website@gmail.com
+> ```Sina Weibo```: [@改名hulk](http://www.weibo.com/tianyi4)
+
+>```     Gmail```: [hulk.website@gmail.com](mailto:hulk.website@gmail.com)
+
+>```      Blog```: [www.hulkdev.com](http://hulkdev.sinaapp.com)
 
 any bugs? send mail, and I will appreciate your help.
