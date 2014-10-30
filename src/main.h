@@ -17,7 +17,6 @@
 #include <stdint.h>
 #include <limits.h>
 #include <stdlib.h>
-#include "zmalloc.h"
 #include <stdbool.h>
 #include "sds.h"
 #include "lzf.h"

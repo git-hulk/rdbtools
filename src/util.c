@@ -8,7 +8,6 @@
 #include <math.h>
 #include <sys/time.h>
 #include "main.h"
-#include "zmalloc.h"
 #include "endian.h"
 
 #define ZIPMAP_BIGLEN 254
@@ -135,7 +134,7 @@ int string2ll(char *s, size_t slen, long long *value) {
  *----------------------------------------------------------------------------*/
 
 listTypeIterator *listTypeInitIterator(unsigned char *subject, int index, unsigned char direction) {
-    listTypeIterator *li = zmalloc(sizeof(listTypeIterator));
+    listTypeIterator *li = malloc(sizeof(listTypeIterator));
     li->subject = subject;
     li->direction = direction;
     li->zi = ziplistIndex(subject,index);
@@ -159,7 +158,7 @@ sds listTypeGet(listTypeEntry *entry) {
 }
 
 void listTypeReleaseIterator(listTypeIterator *li) {
-    zfree(li);
+    free(li);
 }
 
 int listTypeNext(listTypeIterator *li, listTypeEntry *entry) {
@@ -179,7 +178,7 @@ int listTypeNext(listTypeIterator *li, listTypeEntry *entry) {
  * set API
  *----------------------------------------------------------------------------*/
 setTypeIterator *setTypeInitIterator(unsigned char* subject) {
-    setTypeIterator *si = zmalloc(sizeof(setTypeIterator));
+    setTypeIterator *si = malloc(sizeof(setTypeIterator));
     si->subject = subject;
     si->encoding = REDIS_ENCODING_INTSET;
     si->ii = 0;
@@ -187,7 +186,7 @@ setTypeIterator *setTypeInitIterator(unsigned char* subject) {
 }
 
 void setTypeReleaseIterator(setTypeIterator *si) {
-    zfree(si);
+    free(si);
 }
 
 int setTypeNext(setTypeIterator *si ,int64_t *llele) {
@@ -672,7 +671,7 @@ unsigned int ziplistLen(unsigned char *zl) {
 
 
 hashTypeIterator *hashTypeInitIterator(unsigned char *subject) {
-    hashTypeIterator *hi = zmalloc(sizeof(hashTypeIterator));
+    hashTypeIterator *hi = malloc(sizeof(hashTypeIterator));
     hi->subject = subject;
     hi->fptr = NULL;
     hi->vptr = NULL;
@@ -681,7 +680,7 @@ hashTypeIterator *hashTypeInitIterator(unsigned char *subject) {
 }
 
 void hashTypeReleaseIterator(hashTypeIterator *hi) {
-    zfree(hi);
+    free(hi);
 }
 
 int hashTypeNext(hashTypeIterator *hi) {
