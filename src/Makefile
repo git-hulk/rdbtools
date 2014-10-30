@@ -17,8 +17,6 @@ rdb_parser.o: rdb_parser.c rdb_parser.h main.h zmalloc.h sds.h  \
 sds.o: sds.c sds.h zmalloc.h
 util.o: util.c  main.h zmalloc.h sds.h   \
   lzf.h
-ziplist.o: ziplist.c zmalloc.h util.h main.h sds.h   \
-   lzf.h endian.h
 zmalloc.o: zmalloc.c zmalloc.h
 clean:
-	-rm *.o rtools
+	-rm *.o rdb-tools

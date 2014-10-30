@@ -22,11 +22,11 @@ rdb_tools
 ```shell
 $ cd rdb_tools # (or rdb_tools/src)
 $ make # and will be a binary file named rdb-parser in src.
-$ ./rtools -f ../tests/dump2.4.rdb 
+$ ./rdb-tools -f ../tests/dump2.4.rdb 
 ```
 
 #### 4. how to define user's handle for differnt data type.
-> open src/main.c, you can see an callback function called userHandler, which we do nothing in example.
+> open src/callbacks.c, you can see an callback function called userHandler, which we do nothing in example.
 > Remeber don't free any parameters (like key, vals) in userHandler, as we freed it already.
 > Prototype is below:
 
