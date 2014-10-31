@@ -330,11 +330,7 @@ static void* rdbLoadValueObject(FILE *fp, int type, unsigned int *rlen) {
         j = 0;    
         if ((zsetlen = rdbLoadLen(fp,NULL)) == REDIS_RDB_LENERR) return NULL;
 
-        if(rdb_version < 2) {
-            *rlen = zsetlen * 2;
-        } else {
-            *rlen = zsetlen;
-        }
+        *rlen = zsetlen * 2;
         results = malloc( *rlen * sizeof(*results));
         while(zsetlen--) {
             if ((ele = rdbLoadEncodedStringObject(fp)) == NULL) return NULL;
