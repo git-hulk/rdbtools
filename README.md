@@ -35,8 +35,11 @@ $ vi callbacks.c
 $ # edit method userHandler as you like, good luck!
 ```
 
-> Note: Remeber don't free any parameters (like key, vals) in userHandler, as we freed it already.
-Prototype is below:
+> Note: 
+
+> Remeber don't free any parameters (like key, vals) in userHandler, as we do that already.
+
+> Prototype is below:
 
 ```c
 /*
