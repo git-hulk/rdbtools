@@ -2,6 +2,7 @@ rdb_tools
 =========
 
 > Notice: This tools was tested on 2.2 , 2.4 , 2.6, 2.8
+> bugs in other versions? open issues, I will fix it, thanks~
 
 
 #### 1. what about this tool to do? 
