@@ -260,11 +260,7 @@ static void *loadZsetZiplistObject(unsigned char* zl, unsigned int *rlen) {
     len = ziplistLen (zl);
     eptr = ziplistIndex(zl,0);
     sptr = ziplistNext(zl,eptr);
-    if(rdb_version < 2) {
-        *rlen = len * 2;
-    } else {
-        *rlen = len;
-    }
+    *rlen = len;
     sds *results = malloc(*rlen * sizeof(sds));
     while (eptr != NULL) {
         score = zzlGetScore(sptr);
