@@ -28,9 +28,15 @@ $ ./rdb-tools -f ../tests/dump2.4.rdb
 ```
 
 #### 4. how to define user's handle for differnt data type.
-> open src/callbacks.c, you can see an callback function called userHandler, which we do nothing in example.
-> Remeber don't free any parameters (like key, vals) in userHandler, as we freed it already.
-> Prototype is below:
+
+```shell
+$ cd src/
+$ vi callbacks.c
+$ # edit method userHandler as you like, good luck!
+```
+
+> Note: Remeber don't free any parameters (like key, vals) in userHandler, as we freed it already.
+Prototype is below:
 
 ```c
 /*
@@ -49,7 +55,7 @@ $ ./rdb-tools -f ../tests/dump2.4.rdb
  * @ return any data as you like.
  */
  
-void* keyValueHandler(int db, int type, void *key, void *val, unsigned int vlen, long long expiretime);
+void* userHandler(int db, int type, void *key, void *val, unsigned int vlen, long long expiretime);
 ```
 
 #### 5. test snapshot
