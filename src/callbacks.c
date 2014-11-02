@@ -30,39 +30,39 @@ void* userHandler (int db, int type, void *key, void *val, unsigned int vlen, lo
     sds * val_arr;
     if(type == REDIS_STRING) {
         /* handle which type is string */
-        printf("KEY: %s || TYPE: STRING || expiretime:%lld || value:%s\n", (char *)key, expiretime, (char *) val);
+        printf("DB:%d||KEY:%s||TYPE:STRING||EXPIRE:%lld||VALUE:%s\n", db, (char *)key, expiretime, (char *) val);
     } else if (type == REDIS_SET) {
         /* handle which type is set */
-        printf("KEY: %s || TYPE: SET || expiretime:%lld || [ ", (char *)key, expiretime);
+        printf("DB:%d||KEY:%s||TYPE:SET||EXPIRE:%lld ||VALUE:", db, (char *)key, expiretime);
         val_arr = (sds *) val;
         for(i = 0; i < vlen; i++) {
-            printf("%s ,  ", val_arr[i]);
+            printf("%s,", val_arr[i]);
         }
-        printf("]\n");
+        printf("\n");
     } else if(type == REDIS_LIST) {
         /* handle which type is list */
-        printf("KEY: %s || TYPE: LIST || expiretime:%lld || [ ", (char *)key, expiretime);
+        printf("DB:%d||KEY:%s||TYPE:LIST||EXPIRE:%lld||VALUE:", db, (char *)key, expiretime);
         val_arr = (sds *) val;
         for(i = 0; i < vlen; i++) {
-            printf("%s , ", (char*) val_arr[i]);
+            printf("%s,", (char*) val_arr[i]);
         }
-        printf("]\n");
+        printf("\n");
     } else if(type == REDIS_ZSET) { 
         /* handle which type is zset */
-        printf("KEY: %s || TYPE: ZSET || expiretime:%lld || [ ", (char *)key, expiretime);
+        printf("DB:%d||KEY:%s||TYPE:ZSET||EXPIRE:%lld||VALUE:", db, (char *)key, expiretime);
         val_arr = (sds *) val;
         for(i = 0; i < vlen; i += 2) {
-            printf("(%s , %s) ", (char*) val_arr[i], (char*) val_arr[i+1]);
+            printf("(%s,%s) ", (char*) val_arr[i], (char*) val_arr[i+1]);
         }
-        printf("]\n");
+        printf("\n");
     } else if(type == REDIS_HASH) {
         /* handle which type is hash */
-        printf("KEY: %s || TYPE: HASH || expiretime:%lld || [ ", (char *)key, expiretime);
+        printf("DB:%d||KEY:%s||TYPE:HASH||EXPIRE:%lld||VALUE:", db, (char *)key, expiretime);
         val_arr = (sds *) val;
         for(i = 0; i < vlen; i += 2) {
-            printf("(%s , %s)  ", (char*) val_arr[i], (char*) val_arr[i+1]);
+            printf("(%s,%s) ", (char*) val_arr[i], (char*) val_arr[i+1]);
         }
-        printf("]\n");
+        printf("\n");
     }
     printf("\n");
     return NULL;
