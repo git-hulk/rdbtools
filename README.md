@@ -74,6 +74,6 @@ void* userHandler(int db, int type, void *key, void *val, unsigned int vlen, lon
 
 >```Gmail```: [hulk.website@gmail.com](mailto:hulk.website@gmail.com)
 
->```Blog```: [www.hulkdev.com](http://hulkdev.sinaapp.com)
+>```Blog```: [www.hulkdev.com](http://www.hulkdev.com)
 
 any bugs? send mail, and I will appreciate your help.
