@@ -6,7 +6,7 @@ rdb_tools
 > bugs in other versions? open issues, I will fix it, thanks~
 
 #### TODO
-> Aof Output/CSV Output/Standard Output will be support before 2015.1.
+> Aof/CSV/Stdout  will be support before 2015.1.
 
 > And json format maybe coming soon.
 
