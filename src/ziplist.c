@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "endian.h"
+
 #define ZIPLIST_BIGLEN 254
 #define ZIPLIST_END 0xff
 
@@ -19,6 +21,7 @@
 #define ZIP_ENC_STR_32B (2 << 6)
 
 #define ZIP_ENC_STR_MASK 0xc0
+#define ZIP_IS_END(entry) ((uint8_t)entry[0] == ZIPLIST_END)
 
 uint32_t ziplist_entry_size(const char *s);
 
@@ -145,18 +148,22 @@ ziplist_entry_int(const char *entry, int64_t *v)
         return 1;
     } else if (enc == ZIP_ENC_INT16) {
         memcpy(&v16, content + 1, sizeof(int16_t));
+        memrev16ifbe(&v16);
         *v = v16;
         return 1;
     } else if (enc == ZIP_ENC_INT24) {
         memcpy(&v32, content + 1, 3);
+        memrev32ifbe(&v32);
         *v = v32;
         return 1;
     } else if (enc == ZIP_ENC_INT32) {
         memcpy(&v32, content + 1, sizeof(int32_t));
+        memrev32ifbe(&v32);
         *v = v32;
         return 1;
     } else if (enc == ZIP_ENC_INT64){
         memcpy(&v64, content + 1, sizeof(int64_t));
+        memrev64ifbe(&v64);
         *v = v64;
         return 1;
     } else if ((enc & 0xf0) == 0xf0){
@@ -171,13 +178,14 @@ ziplist_entry_int(const char *entry, int64_t *v)
 void
 ziplist_dump(const char *s)
 {
-    uint32_t i;
+    uint32_t i = 0, len;
 
     printf("ziplist { \n");
     printf("bytes: %u\n", ZL_BYTES(s));
     printf("len: %u\n", ZL_LEN(s));
+    len = ZL_LEN(s);
     char *entry = (char *)ZL_ENTRY(s);
-    for(i = 0; i < ZL_LEN(s); i++) {
+    while (!ZIP_IS_END(entry)) {
         if (ziplist_entry_is_str(entry)) {
             printf("str value: %s\n", ziplist_entry_str(entry)); 
         } else {
@@ -186,6 +194,11 @@ ziplist_dump(const char *s)
             printf("int value: %lld\n", v);
         }
         entry += ziplist_entry_size(entry);
+        ++i;
     }
     printf("}\n");
+    if(i < (0xffff - 1) && i != len) {
+        printf("====== Ziplist len error. ======\n");
+        exit(1);
+    }
 }

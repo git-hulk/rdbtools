@@ -2,6 +2,8 @@
 #include <stdio.h> 
 #include <string.h> 
 
+#include "endian.h"
+
 void
 intset_dump(intset *is)
 {
@@ -29,12 +31,15 @@ intset_get(intset *is, int pos, int64_t *v)
 
     if (is->encoding == sizeof(int64_t)) {
         memcpy(&v64, (int64_t*)is->contents + pos, sizeof(int64_t));
+        memrev64ifbe(&v64);
         *v = v64;
     } else if (is->encoding == sizeof(int32_t)) {
         memcpy(&v32, (int32_t*)is->contents + pos, sizeof(int32_t));
+        memrev32ifbe(&v32);
         *v = v32;
     } else {
         memcpy(&v16, (int16_t*)is->contents + pos, sizeof(int16_t));
+        memrev16ifbe(&v16);
         *v = v16;
     }
     return 1;

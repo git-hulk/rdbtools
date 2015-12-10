@@ -4,8 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "endian.h"
+
 #define ZM_END 0xff
 #define ZM_BIGLEN 0xfd
+
+#define ZM_IS_END(entry) ((uint8_t)entry[0] == ZM_END)
 
 uint32_t
 zipmap_entry_len_size(const char *entry)
@@ -29,6 +33,7 @@ zipmap_entry_strlen (const char *entry)
         return (uint8_t)entry[0];
     } else if (entry_len_size == 5) {
         memcpy(&slen, entry + 1, 4);
+        memrev32ifbe(&slen);
         return slen;
     } else {
         return 0;
@@ -44,13 +49,13 @@ zipmap_entry_len (const char *entry)
 void
 zipmap_dump(const char *zm)
 {
-    int i, len, klen, vlen;
+    int i = 0, len, klen, vlen;
     char *key, *val;
 
     len = (uint8_t) zm[0];
     ++zm;
 
-    for ( i =0; i < len; i++ ) {
+    while (!ZM_IS_END(zm)) {
         // key
         klen = zipmap_entry_strlen(zm);
         key = malloc(klen + 1);
@@ -64,5 +69,10 @@ zipmap_dump(const char *zm)
         printf(" key is %s, value is %s\n", key, val);
         free(key);
         free(val);
+        i+=2;
+    }
+    if(len >=254 && i == len) {
+        printf("===== zipmap len error.\n");
+        exit(1);
     }
 }
