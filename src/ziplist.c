@@ -5,25 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "util.h"
 #include "endian.h"
-
-#define ZIPLIST_BIGLEN 254
-#define ZIPLIST_END 0xff
-
-#define ZIP_ENC_INT8  0xfe
-#define ZIP_ENC_INT16 0xc0
-#define ZIP_ENC_INT24 0xf0
-#define ZIP_ENC_INT32 0xd0
-#define ZIP_ENC_INT64 0xe0
-
-#define ZIP_ENC_STR_6B  (0 << 6)
-#define ZIP_ENC_STR_14B (1 << 6)
-#define ZIP_ENC_STR_32B (2 << 6)
-
-#define ZIP_ENC_STR_MASK 0xc0
-#define ZIP_IS_END(entry) ((uint8_t)entry[0] == ZIPLIST_END)
-
-uint32_t ziplist_entry_size(const char *s);
 
 uint32_t
 ziplist_prev_len_size(const char *s)
@@ -176,22 +159,81 @@ ziplist_entry_int(const char *entry, int64_t *v)
 }
 
 void
+push_ziplist_list_or_set (lua_State *L, const char *zl)
+{
+    int64_t v;
+    char *entry, *str;
+
+    entry = (char *)ZL_ENTRY(zl);
+    while (!ZIP_IS_END(entry)) {
+        if (ziplist_entry_is_str(entry)) {
+            str = ziplist_entry_str(entry); 
+            script_pushtableinteger(L, str, 1);
+        } else {
+            if(ziplist_entry_int(entry, &v) > 0) {
+                str = ll2string(v);
+                script_pushtableinteger(L, str, 1);
+            }
+        }
+        entry += ziplist_entry_size(entry);
+        free(str);
+    }
+}
+
+void
+push_ziplist_hash_or_zset(lua_State *L, const char *zl)
+{
+    int64_t v;
+    char *entry, *str, *key, *val;
+
+    entry = (char *)ZL_ENTRY(zl);
+    while (!ZIP_IS_END(entry)) {
+        int i;
+        for (i = 0; i < 2; i++) {
+            if (ziplist_entry_is_str(entry)) {
+                str = ziplist_entry_str(entry); 
+            } else {
+                if(ziplist_entry_int(entry, &v) > 0) {
+                    str = ll2string(v);
+                }
+            }
+            if(i == 0) {
+                key = str;
+            } else {
+                val = str;
+            }
+            entry += ziplist_entry_size(entry);
+        }
+
+        script_pushtablestring(L, key, val);
+        free(key);
+        free(val);
+    }
+}
+
+void
 ziplist_dump(const char *s)
 {
     uint32_t i = 0, len;
+    char *entry, *str;
 
     printf("ziplist { \n");
     printf("bytes: %u\n", ZL_BYTES(s));
     printf("len: %u\n", ZL_LEN(s));
     len = ZL_LEN(s);
-    char *entry = (char *)ZL_ENTRY(s);
+    entry = (char *)ZL_ENTRY(s);
     while (!ZIP_IS_END(entry)) {
         if (ziplist_entry_is_str(entry)) {
-            printf("str value: %s\n", ziplist_entry_str(entry)); 
+            str = ziplist_entry_str(entry); 
+            if (str) {
+                printf("str value: %s\n", str); 
+                free(str);
+            }
         } else {
             int64_t v;
-            ziplist_entry_int(entry, &v);
-            printf("int value: %lld\n", v);
+            if(ziplist_entry_int(entry, &v) > 0) {
+                printf("int value: %lld\n", v);
+            }
         }
         entry += ziplist_entry_size(entry);
         ++i;

@@ -4,11 +4,13 @@
 #include <string.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <arpa/inet.h>
 #include "util.h"
 #include "lzf.h"
 #include "intset.h"
 #include "ziplist.h"
 #include "zipmap.h"
+#include "script.h"
 
 #define MAGIC_STR "REDIS"
 #define REDIS_EXPIRE_SEC 0xfd
@@ -117,7 +119,7 @@ rdb_load_lzf_string(int fd)
         return NULL;
 
     cstr = malloc(clen);
-    str = malloc(len);
+    str = malloc(len+1);
 
     int ret;
     if ((ret = read(fd, cstr, clen)) == 0) goto err;
@@ -169,65 +171,90 @@ rdb_load_string(int fd)
 }
 
 void
-rdb_load_list (int fd)
+push_list (lua_State *L, int fd)
 {
     int i, len;
     char *elem;
 
     len = rdb_load_len(fd, NULL); 
-    printf("List { len : %d\n ", len);
     for (i = 0; i < len; i++) {
         elem = rdb_load_string(fd);
-        printf("%s\n", elem);
+        script_pushtableinteger(L, elem, 1);
         free(elem);
     }
-    printf("}\n");
 }
 
 void
-rdb_load_hash (int fd)
+push_hash (lua_State *L, int fd)
 {
     int i, len;
     char *key , *val;
 
     len = rdb_load_len(fd, NULL); 
-    printf("HASH { len : %d\n ", len);
     for (i = 0; i < len; i++) {
         key = rdb_load_string(fd);
         val = rdb_load_string(fd);
-        printf("(%s,%s)", key, val);
+        script_pushtablestring(L, key, val);
         free(key);
         free(val);
     }
-    printf("}\n");
 }
 
 void
-rdb_load_obj(int fd, int type)
+rdb_load_value(lua_State *L, int fd, int type)
 {
+    int i;
+    int64_t v64;
+    char *str = NULL, *val_type = "string";
+    char *s64;
+
     if (REDIS_RDB_STRING == type) {
-        rdb_load_string(fd);
-    } else if (REDIS_RDB_INTSET == type) {
-        char *is_str = rdb_load_string(fd);
-        intset *is = (intset*) is_str; 
-        intset_dump(is);
+        str = rdb_load_string(fd);
+        script_pushtablestring(L, "value", str);
+        script_pushtablestring(L, "type", val_type);
+        free(str);
+        return;
+    }
+    
+    lua_pushstring(L, "value");
+    lua_newtable(L);
+    if (REDIS_RDB_INTSET == type) {
+        str = rdb_load_string(fd);
+        intset *is = (intset*) str;
+        for (i = 0; i< is->length; i++) {
+            intset_get(is, i, &v64);
+            s64 = ll2string(v64); 
+            script_pushtableinteger(L, s64, 1);
+            free(s64);
+        }
+
+        val_type = "set";
     } else if (REDIS_RDB_LIST_ZIPLIST == type) {
-        char *zl_str = rdb_load_string(fd);
-        ziplist_dump(zl_str);
+        str = rdb_load_string(fd);
+        push_ziplist_list_or_set(L, str);
+        val_type = "list";
     } else if (REDIS_RDB_ZIPMAP == type) {
-        char *zm_str = rdb_load_string(fd);
-        zipmap_dump(zm_str);
+        str = rdb_load_string(fd);
+        push_zipmap(L, str);
+        val_type = "hash";
     } else if (REDIS_RDB_ZSET_ZIPLIST== type
             || REDIS_RDB_HASH_ZIPLIST == type) {
-        char *zl_str = rdb_load_string(fd);
-        ziplist_dump(zl_str);
+        str = rdb_load_string(fd);
+        val_type = REDIS_RDB_ZSET_ZIPLIST== type? "zset" : "hash";
     } else if (REDIS_RDB_LIST == type
             || REDIS_RDB_SET == type) {
-        rdb_load_list(fd);
+        push_list(L, fd);
+        val_type = REDIS_RDB_LIST == type? "list" : "set";
     } else if (REDIS_RDB_HASH == type
             || REDIS_RDB_ZSET == type) {
-        rdb_load_hash(fd);
+        push_hash(L, fd);
+        val_type = REDIS_RDB_HASH == type? "hash" : "zset";
     }
+
+    lua_settable(L,-3);
+    script_pushtablestring(L, "type", val_type);
+
+    if(str) free(str);
 }
 
 uint32_t
@@ -255,12 +282,12 @@ rdb_load_ms_time(int fd)
 }
 
 int
-rdb_load(const char *path)
+rdb_load(lua_State *L, const char *path)
 {
     char buf[128];
     int version;
     uint8_t type, db_num;
-    uint64_t expire_time;
+    int expire_time;
 
     if (access(path, R_OK) != 0) {
         return -1;
@@ -275,29 +302,25 @@ rdb_load(const char *path)
     version = atoi(buf + 5);
 
     while (1) {
-        expire_time = 0;
+        expire_time = -1;
         type = rdb_load_type(rdb_fd);
 
         // load expire time if exists
         if (REDIS_EXPIRE_SEC == type) {
             // convert to millisecond
-            expire_time = rdb_load_time(rdb_fd) * 1000; 
+            expire_time = rdb_load_time(rdb_fd); 
             // load value type
             type = rdb_load_type(rdb_fd);
         } else if (REDIS_EXPIRE_MS == type) {
-            expire_time = rdb_load_ms_time(rdb_fd); 
+            expire_time = rdb_load_ms_time(rdb_fd) / 1000; 
             // load value type
             type = rdb_load_type(rdb_fd);
-        }
-        if(expire_time > 0) {
-            printf("expire time is %llu.\n", expire_time);
         }
 
         // select db
         if (REDIS_SELECT_DB == type) {
             read(rdb_fd, buf, 1);
             db_num = (uint8_t)buf[0];
-            printf("Select db %d\n", db_num);
             continue;
         }
 
@@ -306,20 +329,23 @@ rdb_load(const char *path)
 
         // read key
         char *key = rdb_load_string(rdb_fd);
-        printf("key is %s\n", key);
-        // read value
-        rdb_load_obj(rdb_fd, type);
+        if (key) {
+            lua_getglobal(L, "handle");
+            lua_newtable(L);
+            script_pushtablestring(L, "key", key);
+            script_pushtableinteger(L, "expire_time", expire_time);
+        }
 
+        // read value
+        rdb_load_value(L, rdb_fd, type);
+
+        if(key) {
+            lua_pcall(L, 1, 0, 0);
+        }
+        free(key);
     }
 
     close(rdb_fd);
 
-    return 0;
-}
-
-int
-main(int argc, char **argv)
-{
-    printf("result: %d\n", rdb_load(argv[1]));
     return 0;
 }
