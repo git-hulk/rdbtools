@@ -41,14 +41,16 @@
 #define REDIS_RDB_ENC_INT32 2
 #define REDIS_RDB_ENC_LZF 3
 
-/* ========================  ENCODE/DECODE ===================== */
 
 /* =======================  RDB LOAD ====================== */
 uint8_t
 rdb_load_type(int fd)
 {
     char buf[1];
-    read(fd, buf, 1);
+    if(read(fd, buf, 1) == 0) {
+        fprintf(stderr, "Exited, as read error on load type.\n");
+        exit(1);
+    }
 
     return (uint8_t) buf[0];
 }
@@ -91,15 +93,18 @@ rdb_load_int(int fd, uint8_t enc)
     char buf[4];
 
     if (REDIS_RDB_ENC_INT8 == enc) {
-        read(fd, buf, 1);
+        if (read(fd, buf, 1) == 0) goto READERR;
         return (int8_t)buf[0];
     } else if (REDIS_RDB_ENC_INT16 == enc) {
-        read(fd, buf, 2);
+        if (read(fd, buf, 2) == 0) goto READERR;
         return (int16_t)((uint8_t)buf[0] | ((uint8_t)buf[1] << 8));
     } else {
-        read(fd, buf, 4);
+        if (read(fd, buf, 4) == 0) goto READERR;
         return (int32_t)((uint8_t)buf[0] | ((uint8_t)buf[1] << 8) | ((uint8_t)buf[2] << 16) | ((uint8_t)buf[3] << 24));
     }
+READERR:
+    fprintf(stderr, "Exited, as read error on load integer.\n");
+    exit(1);
 }
 
 char *
@@ -120,6 +125,10 @@ rdb_load_lzf_string(int fd)
 
     cstr = malloc(clen);
     str = malloc(len+1);
+    if (!cstr || !str) {
+        fprintf(stderr, "Exited, as malloc failed at load lzf string.\n");
+        exit(1);
+    }
 
     int ret;
     if ((ret = read(fd, cstr, clen)) == 0) goto err;
@@ -158,13 +167,20 @@ rdb_load_string(int fd)
 
              default:
                 // unkonwn error.
-                break;
+                fprintf(stderr, "Exited, as error on load string.\n");
+                exit(1);
         }
     }
 
+    int i = 0, bytes;
     buf = malloc(len + 1);
-    // FIXME: if len is too large?
-    read(fd, buf, len);
+    if (!buf) {
+        fprintf(stderr, "Exited, as malloc failed at load string.\n");
+        exit(1);
+    }
+    while ( i < len && (bytes = read(fd, buf + i, len - i))) {
+        i += bytes;
+    }
     buf[len] = '\0';
 
     return buf;
@@ -179,7 +195,7 @@ push_list (lua_State *L, int fd)
     len = rdb_load_len(fd, NULL); 
     for (i = 0; i < len; i++) {
         elem = rdb_load_string(fd);
-        script_pushtableinteger(L, elem, 1);
+        script_push_list_elem(L, elem, i);
         free(elem);
     }
 }
@@ -263,7 +279,10 @@ rdb_load_time(int fd)
     char buf[4];
     uint32_t t32;
 
-    read(fd, buf, 4);
+    if( read(fd, buf, 4) == 0) {
+        fprintf(stderr, "Exited, as read error on load time.\n");
+        exit(1);
+    }
     memcpy(&t32, buf, 4);
 
     return t32;
@@ -275,7 +294,10 @@ rdb_load_ms_time(int fd)
     char buf[8];
     uint64_t t64;
 
-    read(fd, buf, 8);
+    if( read(fd, buf, 8) == 0) {
+        fprintf(stderr, "Exited, as read error on load microtime.\n");
+        exit(1);
+    }
     memcpy(&t64, buf, 8);
 
     return t64;
@@ -296,7 +318,10 @@ rdb_load(lua_State *L, const char *path)
     int rdb_fd = open(path, O_RDONLY);
 
     // read magic string(5bytes) and version(4bytes)
-    read(rdb_fd, buf, 9);
+    if(read(rdb_fd, buf, 9) == 0) {
+        fprintf(stderr, "Exited, as read error on laod version\n");
+        exit(1);
+    }
     buf[9] = '\0';
     if(memcmp(buf, MAGIC_STR, 5) != 0) return -2;
     version = atoi(buf + 5);
@@ -319,7 +344,9 @@ rdb_load(lua_State *L, const char *path)
 
         // select db
         if (REDIS_SELECT_DB == type) {
-            read(rdb_fd, buf, 1);
+            if (read(rdb_fd, buf, 1) == 0) {
+                fprintf(stderr, "Exited, as read error on laod db num.\n");
+            }
             db_num = (uint8_t)buf[0];
             continue;
         }
@@ -334,14 +361,16 @@ rdb_load(lua_State *L, const char *path)
             lua_newtable(L);
             script_pushtablestring(L, "key", key);
             script_pushtableinteger(L, "expire_time", expire_time);
+
+            // read value
+            rdb_load_value(L, rdb_fd, type);
+            if( lua_pcall(L, 1, 0, 0) != 0 ) {
+                printf("error running function `f': %s",
+                        lua_tostring(L, -1));
+            }
+                
         }
 
-        // read value
-        rdb_load_value(L, rdb_fd, type);
-
-        if(key) {
-            lua_pcall(L, 1, 0, 0);
-        }
         free(key);
     }
 

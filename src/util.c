@@ -1,4 +1,5 @@
 #include "util.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 char *
@@ -12,7 +13,11 @@ ll2string(long long v)
     while ((tmp /= 10) > 0) len++;
     
     buf = malloc(len);
-  
+    if (!buf) {
+        fprintf(stderr, "Exited, as malloc failed at ll2string.\n");
+        exit(1);
+    }
+
     i = len - 2;
     while (v > 0) {
         buf[i--] = v % 10 + '0';
@@ -24,7 +29,6 @@ ll2string(long long v)
 }
 
 #ifdef _UTIL_
-#include <stdio.h>
 int main()
 {
     int v1 = 0;

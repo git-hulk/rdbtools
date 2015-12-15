@@ -102,6 +102,9 @@ ziplist_entry_str(const char *entry)
         
         slen = ziplist_entry_strlen(entry);
         str = malloc(slen + 1); 
+        if (!str) {
+            fprintf(stderr, "Exited, as malloc failed at ziplist entry str.\n");
+        }
         memcpy(str, content, slen);
         str[slen] = '\0';
     }

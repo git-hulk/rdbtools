@@ -55,15 +55,25 @@ void push_zipmap(lua_State *L, const char *zm)
         // key
         klen = zipmap_entry_strlen(zm);
         key = malloc(klen + 1);
+        if (!key) {
+            fprintf(stderr, "Exited, as malloc failed at zipmap.\n");
+            exit(1);
+        }
+
         memcpy(key, zm + zipmap_entry_len_size(zm), klen);
         key[klen] = '\0';
-        
         zm += zipmap_entry_len(zm);
+
         // value
         vlen = zipmap_entry_strlen(zm);
         val = malloc(vlen + 1);
-        val[vlen] = '\0';
+        if (!val) {
+            fprintf(stderr, "Exited, as malloc failed at zipmap.\n");
+            exit(1);
+        }
+
         memcpy(val, zm + zipmap_entry_len_size(zm) + 1, vlen);
+        val[vlen] = '\0';
         zm += zipmap_entry_len(zm) + 1;
 
         script_pushtablestring(L, key, val);

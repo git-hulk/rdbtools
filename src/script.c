@@ -51,3 +51,10 @@ script_pushtablestring(lua_State* L , char* key , char* value)
     lua_pushstring(L, value);
     lua_settable(L, -3);
 }
+
+void
+script_push_list_elem(lua_State* L , char* key, int ind)
+{
+    lua_pushstring(L, key);
+    lua_rawseti(L,-2,ind + 1);
+}
