@@ -54,8 +54,8 @@ endif
 endif
 
 deps:
-	#@cd ../deps/lua/src && make $(os_Platform)
+	@cd ../deps/lua/src && make $(os_Platform)
 
 clean:
 	- rm -rf *.o $(PROG)
-	#@cd ../deps/lua/src/ && make clean
+	@cd ../deps/lua/src/ && make clean
