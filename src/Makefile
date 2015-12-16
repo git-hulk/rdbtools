@@ -5,6 +5,10 @@ CLIBS = ../deps/lua/src/liblua.a -lm -ldl
 
 PROG = rdbtools 
 
+INSTALL=/usr/bin/install
+INSTALLDIR=/usr/local
+BINDIR=$(INSTALLDIR)/bin
+
 all: deps $(PROG)
 .PHONY: all
 
@@ -60,3 +64,7 @@ deps:
 clean:
 	- rm -rf *.o $(PROG)
 	@cd ../deps/lua/src/ && make clean
+
+install:
+	mkdir -p $(BINDIR)
+	$(INSTALL) $(PROG) $(BINDIR)
