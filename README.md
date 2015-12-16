@@ -16,7 +16,7 @@ A tool use c to analyze redis rdb file, and use lua to handle.
 
 #### 2. How to use?
 ```shell
-$ cd rdbtools/src # (or rdbtools/src)
+$ cd rdbtools # (or rdbtools/src)
 $ make # and will be a binary file named rdb-parser in src.
 $ ./rdbtools -f ../tests/dump2.4.rdb -s ../scripts/example.lua
 ```
@@ -34,6 +34,18 @@ USAGE: ./rdbtools [-f file] -V -h
 If you want to handle key-value in rdb file, you can use `-s your_script.lua`, and lua function `handle` will be callbacked.
 
 Example can be found in `scripts/example.lua`, and it just print the key-value.
+
+Other example is to json format, see 'scripts/json_example.lua'
+
+cat scripts/json_exapmle.lua 
+
+```lua
+local cjson = require "cjson"
+
+function handle(item)
+     print(cjson.encode(item))
+end     
+```
 
 #### 4. Params in handle function
 

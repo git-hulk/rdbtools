@@ -3,6 +3,8 @@
 #include <string.h>
 #include "log.h"
 
+LUALIB_API int (luaopen_cjson) (lua_State *L); 
+
 void
 lua_loadlib(lua_State *L, const char *libname, lua_CFunction luafunc) {
     lua_pushcfunction(L, luafunc);
@@ -15,6 +17,7 @@ script_init(const char *filename)
 {
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
+    lua_loadlib(L, "cjson", luaopen_cjson);
     luaL_dofile(L, filename);
 
     lua_newtable(L);
