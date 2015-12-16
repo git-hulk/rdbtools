@@ -21,6 +21,7 @@ $ make
 $ ./rdbtools -f ../tests/dump2.4.rdb -s ../scripts/example.lua
 ```
 
+NOTE: Compile error with readline.h is not found, just use yum or apt-get to install readline and readline-devel
 #### 3. Options
 
 ```shell
