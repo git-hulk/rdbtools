@@ -1,26 +1,24 @@
-
-function format_value(obj)
+function format_value(item)
     -- return hash to string
-    if obj.type == "hash" or obj.type == "zset" then
+    if item.type == "hash" or item.type == "zset" then
         local hash_str = "{"
-        for k, v in pairs(obj.value) do
+        for k, v in pairs(item.value) do
             hash_str = hash_str ..k.."=>"..v.." ,"
         end
         return string.sub(hash_str, 0, -2) .."}"
         
     -- return list to string
-    elseif obj.type == "set" or obj.type == "list" then
-        return "["..table.concat(obj.value, ", ").."]"
+    elseif item.type == "set" or item.type == "list" then
+        return "["..table.concat(item.value, ", ").."]"
     else
-        return obj.value
+        return item.value
     end
 end
 
-function handle(obj)
-    local value = format_value(obj) 
+function handle(item)
+    local value = format_value(item) 
     -- env = {version = $version, db_num = $db_num}
-    print(env.db_num)
-    local obj_str = string.format("{ type: %s, expire_time: %s, key: %s, value: %s}", 
-        obj.type, obj.expire_time, obj.key, value)
-     print(obj_str)
+    local item_str = string.format("{ select_db:%d, type: %s, expire_time: %s, key: %s, value: %s}", 
+        env.db_num, item.type, item.expire_time, item.key, value)
+     print(item_str)
 end

@@ -13,10 +13,11 @@
 static void
 usage(void)
 {
-    fprintf(stderr, "USAGE: ./rtools [-f file] -V -h\n");
+    fprintf(stderr, "USAGE: ./rdbtools [-f file] -V -h\n");
     fprintf(stderr, "\t-V --version \n");
     fprintf(stderr, "\t-h --help show usage \n");
     fprintf(stderr, "\t-f --file specify which rdb file would be parsed.\n");
+    fprintf(stderr, "\t-s --file specify which lua script, default is ../scripts/example.lua\n");
     fprintf(stderr, "\t Notice: This tool only test on redis 2.2 and 2.4, 2.6, 2.8.\n\n");
 }
 
