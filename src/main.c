@@ -3,29 +3,39 @@
  * author: @hulk 
  * date: 2014-08-13
  */
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <getopt.h>
-#include "main.h"
-#include "rdb_parser.h"
-#include "callbacks.c"
+#include "rdb.h"
+#include "log.h"
 
-static void usage(void) {
-    fprintf(stderr, "USAGE: ./rtools [-f file] -V -h\n");
+static void
+usage(void)
+{
+    fprintf(stderr, "USAGE: ./rdbtools [-f file] -V -h\n");
     fprintf(stderr, "\t-V --version \n");
     fprintf(stderr, "\t-h --help show usage \n");
     fprintf(stderr, "\t-f --file specify which rdb file would be parsed.\n");
+    fprintf(stderr, "\t-s --file specify which lua script, default is ../scripts/example.lua\n");
     fprintf(stderr, "\t Notice: This tool only test on redis 2.2 and 2.4, 2.6, 2.8.\n\n");
 }
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv)
+{
     int c;
-    int parse_result;
-    char *rdbFile;
-    bool is_show_help = false, is_show_version = false;
-    char short_options [] = { "hVf:" };
+    char *rdb_file = NULL;
+    char *lua_file = NULL;
+    int is_show_help = 0, is_show_version = 0;
+    char short_options [] = { "hVf:s:" };
+    lua_State *L;
+
     struct option long_options[] = {
          { "help", no_argument, NULL, 'h' }, /* help */
          { "version", no_argument, NULL, 'V' }, /* version */
          { "rdb-iile-path", required_argument,  NULL, 'f' }, /* rdb file path*/
+         { "lua_file-path", required_argument,  NULL, 's' }, /* rdb file path*/
          { NULL, 0, NULL, 0  }
     };
 
@@ -36,13 +46,16 @@ int main(int argc, char **argv) {
         }
         switch (c) {
             case 'h':
-                is_show_help = true;
+                is_show_help = 1;
                 break;
             case 'V':
-                is_show_version = true;
+                is_show_version = 1;
                 break;
             case 'f':
-                rdbFile = optarg;
+                rdb_file = optarg;
+                break;
+            case 's':
+                lua_file = optarg;
                 break;
             default:
                 exit(0);
@@ -50,7 +63,7 @@ int main(int argc, char **argv) {
     }
 
     if(is_show_version) {
-        fprintf(stderr, "\nHELLO, THIS RDB PARSER VERSION 1.0\n\n");
+       fprintf(stderr, "\nHELLO, THIS RDB PARSER VERSION 1.0\n\n");
     }
     if(is_show_help) {
         usage();
@@ -58,15 +71,23 @@ int main(int argc, char **argv) {
     if(is_show_version || is_show_help) {
         exit(0);
     }
-    if(!rdbFile) {
-        fprintf(stderr, "ERR: U must specify rdb file by option -f filepath.\n");
-        exit(0);
+    if(!rdb_file) {
+        logger(ERROR, "You must specify rdb file by option -f filepath.\n");
+    }
+    if(!lua_file) {
+        lua_file = "../scripts/example.lua";
+    }
+    if (access(rdb_file, R_OK) != 0)
+    {
+        logger(ERROR, "rdb file %s is not exists.\n", rdb_file);
+    }
+    if (access(lua_file, R_OK) != 0)
+    {
+        logger(ERROR, "lua file %s is not exists.\n", lua_file);
     }
 
-    /* start parse rdb file. */
-    printf("--------------------------------------------RDB PARSER------------------------------------------\n");
-    parse_result = rdbParse(rdbFile, userHandler);
-    printf("--------------------------------------------RDB PARSER------------------------------------------\n");
-    dumpParserInfo(); 
+    L = script_init(lua_file);
+    rdb_load(L, rdb_file);
+    lua_close(L);
     return 0;
 }
