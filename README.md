@@ -35,9 +35,10 @@ If you want to handle key-value in rdb file, you can use `-s your_script.lua`, a
 
 Example can be found in `scripts/example.lua`, and it just print the key-value.
 
-Other example is to json format, see 'scripts/json_example.lua'
 
-cat scripts/json_exapmle.lua 
+##### Json format example
+
+`cat scripts/json_exapmle.lua`
 
 ```lua
 local cjson = require "cjson"
@@ -46,6 +47,9 @@ function handle(item)
      print(cjson.encode(item))
 end     
 ```
+
+And result is below:
+![image](https://raw.githubusercontent.com/git-hulk/rdbtools/master/snapshot/rdbtools-to-json.png)
 
 #### 4. Params in handle function
 
