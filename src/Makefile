@@ -8,7 +8,7 @@ PROG = rdbtools
 all: deps $(PROG)
 .PHONY: all
 
-OBJS = lzf_d.o rdb.o util.o ziplist.o intset.o zipmap.o endian.o script.o main.o
+OBJS = lzf_d.o rdb.o util.o ziplist.o intset.o zipmap.o endian.o crc64.o script.o main.o
 
 rdbtools: $(OBJS)
 	$(CC) $(CFLAGS) $(CINCLUDES) -o $(PROG) $(OBJS) $(CLIBS)
@@ -18,22 +18,22 @@ endian.o: endian.c
 intset.o: intset.c intset.h endian.h
 lzf_d.o: lzf_d.c lzfP.h
 main.o: main.c rdb.h script.h ../deps/lua/src/lua.h \
- ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
- ../deps/lua/src/lua.h ../deps/lua/src/lualib.h
+  ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
+  ../deps/lua/src/lualib.h
 rdb.o: rdb.c util.h lzf.h intset.h ziplist.h script.h \
- ../deps/lua/src/lua.h ../deps/lua/src/luaconf.h \
- ../deps/lua/src/lauxlib.h ../deps/lua/src/lua.h ../deps/lua/src/lualib.h \
- zipmap.h
+  ../deps/lua/src/lua.h ../deps/lua/src/luaconf.h \
+  ../deps/lua/src/lauxlib.h ../deps/lua/src/lualib.h zipmap.h crc64.h \
+  endian.h
 script.o: script.c script.h ../deps/lua/src/lua.h \
- ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
- ../deps/lua/src/lua.h ../deps/lua/src/lualib.h
+  ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
+  ../deps/lua/src/lualib.h
 util.o: util.c util.h
 ziplist.o: ziplist.c ziplist.h script.h ../deps/lua/src/lua.h \
- ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
- ../deps/lua/src/lua.h ../deps/lua/src/lualib.h util.h endian.h
+  ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
+  ../deps/lua/src/lualib.h util.h endian.h
 zipmap.o: zipmap.c zipmap.h script.h ../deps/lua/src/lua.h \
- ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
- ../deps/lua/src/lua.h ../deps/lua/src/lualib.h endian.h
+  ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
+  ../deps/lua/src/lualib.h endian.h
 
 %.o: %.c 
 	$(CC) $(CFLAGS) $(CINCLUDES)  -c $<
