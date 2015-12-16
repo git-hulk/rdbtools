@@ -16,8 +16,8 @@ A tool use c to analyze redis rdb file, and use lua to handle.
 
 #### 2. How to use?
 ```shell
-$ cd rdbtools # (or rdbtools/src)
-$ make # and will be a binary file named rdb-parser in src.
+$ cd rdbtools/src
+$ make
 $ ./rdbtools -f ../tests/dump2.4.rdb -s ../scripts/example.lua
 ```
 
