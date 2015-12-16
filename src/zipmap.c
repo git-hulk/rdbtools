@@ -50,6 +50,7 @@ void push_zipmap(lua_State *L, const char *zm)
 {
     int klen, vlen;
     char *key, *val;
+
     ++zm;
     while (!ZM_IS_END(zm)) {
         // key

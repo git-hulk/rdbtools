@@ -240,7 +240,7 @@ rdb_load_value(lua_State *L, int fd, int type)
         for (i = 0; i< is->length; i++) {
             intset_get(is, i, &v64);
             s64 = ll2string(v64); 
-            script_pushtableinteger(L, s64, 1);
+            script_push_list_elem(L, s64, i);
             free(s64);
         }
 
@@ -256,6 +256,7 @@ rdb_load_value(lua_State *L, int fd, int type)
     } else if (REDIS_RDB_ZSET_ZIPLIST== type
             || REDIS_RDB_HASH_ZIPLIST == type) {
         str = rdb_load_string(fd);
+        push_ziplist_hash_or_zset(L, str);
         val_type = REDIS_RDB_ZSET_ZIPLIST== type? "zset" : "hash";
     } else if (REDIS_RDB_LIST == type
             || REDIS_RDB_SET == type) {
@@ -311,12 +312,7 @@ rdb_load(lua_State *L, const char *path)
     uint8_t type, db_num;
     int expire_time;
 
-    if (access(path, R_OK) != 0) {
-        return -1;
-    }
-
     int rdb_fd = open(path, O_RDONLY);
-
     // read magic string(5bytes) and version(4bytes)
     if(read(rdb_fd, buf, 9) == 0) {
         fprintf(stderr, "Exited, as read error on laod version\n");

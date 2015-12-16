@@ -164,20 +164,19 @@ ziplist_entry_int(const char *entry, int64_t *v)
 void
 push_ziplist_list_or_set (lua_State *L, const char *zl)
 {
-    int64_t v;
+    int64_t i = 0, v;
     char *entry, *str;
 
     entry = (char *)ZL_ENTRY(zl);
     while (!ZIP_IS_END(entry)) {
         if (ziplist_entry_is_str(entry)) {
             str = ziplist_entry_str(entry); 
-            script_pushtableinteger(L, str, 1);
         } else {
             if(ziplist_entry_int(entry, &v) > 0) {
                 str = ll2string(v);
-                script_pushtableinteger(L, str, 1);
             }
         }
+        script_push_list_elem(L, str,  i++);
         entry += ziplist_entry_size(entry);
         free(str);
     }

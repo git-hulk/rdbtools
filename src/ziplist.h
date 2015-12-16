@@ -30,7 +30,7 @@ typedef struct {
     char entrys[0];
 } ziplist;
 
-void push_ziplist_zset_or_hash (lua_State *L, const char *zl);
+void push_ziplist_hash_or_zset(lua_State *L, const char *zl);
 void push_ziplist_list_or_set (lua_State *L, const char *zl);
 void ziplist_dump(const char *s);
 #endif

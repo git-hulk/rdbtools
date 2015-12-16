@@ -5,6 +5,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <getopt.h>
 #include "rdb.h"
 
@@ -22,15 +23,17 @@ int
 main(int argc, char **argv)
 {
     int c;
-    char *rdb_file;
+    char *rdb_file = NULL;
+    char *lua_file = NULL;
     int is_show_help = 0, is_show_version = 0;
-    char short_options [] = { "hVf:" };
+    char short_options [] = { "hVf:s:" };
     lua_State *L;
 
     struct option long_options[] = {
          { "help", no_argument, NULL, 'h' }, /* help */
          { "version", no_argument, NULL, 'V' }, /* version */
          { "rdb-iile-path", required_argument,  NULL, 'f' }, /* rdb file path*/
+         { "lua_file-path", required_argument,  NULL, 's' }, /* rdb file path*/
          { NULL, 0, NULL, 0  }
     };
 
@@ -48,6 +51,9 @@ main(int argc, char **argv)
                 break;
             case 'f':
                 rdb_file = optarg;
+                break;
+            case 's':
+                lua_file = optarg;
                 break;
             default:
                 exit(0);
@@ -67,8 +73,21 @@ main(int argc, char **argv)
         fprintf(stderr, "ERR: U must specify rdb file by option -f filepath.\n");
         exit(0);
     }
+    if(!lua_file) {
+        lua_file = "../scripts/example.lua";
+    }
+    if (access(rdb_file, R_OK) != 0)
+    {
+        fprintf(stderr, "rdb file %s is not exists.\n", rdb_file);
+        exit(1);
+    }
+    if (access(lua_file, R_OK) != 0)
+    {
+        fprintf(stderr, "lua file %s is not exists.\n", lua_file);
+        exit(1);
+    }
 
-    L = script_init("example.lua");
+    L = script_init(lua_file);
     rdb_load(L, rdb_file);
     lua_close(L);
     return 0;
