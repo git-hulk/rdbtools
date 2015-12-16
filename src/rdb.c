@@ -11,6 +11,8 @@
 #include "ziplist.h"
 #include "zipmap.h"
 #include "script.h"
+#include "crc64.h"
+#include "endian.h"
 
 #define MAGIC_STR "REDIS"
 #define REDIS_EXPIRE_SEC 0xfd
@@ -41,13 +43,29 @@
 #define REDIS_RDB_ENC_INT32 2
 #define REDIS_RDB_ENC_LZF 3
 
+uint64_t cksum = 0;
+ // NOTE: trick here, version set 5 as we want to calc crc where read version field.
+int version = 5;
+
+ssize_t    
+crc_read(int fildes, void *buf, size_t nbyte)
+{
+    ssize_t len;
+    len = read(fildes, buf, nbyte);
+
+    if (version >= 5) {
+        cksum = crc64(cksum, buf, len);
+    }
+
+    return len;
+}
 
 /* =======================  RDB LOAD ====================== */
 uint8_t
 rdb_load_type(int fd)
 {
     char buf[1];
-    if(read(fd, buf, 1) == 0) {
+    if(crc_read(fd, buf, 1) == 0) {
         fprintf(stderr, "Exited, as read error on load type.\n");
         exit(1);
     }
@@ -64,7 +82,7 @@ rdb_load_len(int fd, uint8_t *is_encoded)
     uint32_t len;
 
    if (is_encoded) *is_encoded = 0;
-    if (read(fd, buf, 1) == 0) return REDIS_RDB_LENERR;
+    if (crc_read(fd, buf, 1) == 0) return REDIS_RDB_LENERR;
     type = (buf[0] & 0xc0) >> 6; 
 
     /**
@@ -76,10 +94,10 @@ rdb_load_len(int fd, uint8_t *is_encoded)
     if (REDIS_RDB_6B == type) {
         return (uint8_t)buf[0] & 0x3f;
     } else if (REDIS_RDB_14B == type) {
-        if (read(fd, buf + 1, 1) == 0) return REDIS_RDB_LENERR;
+        if (crc_read(fd, buf + 1, 1) == 0) return REDIS_RDB_LENERR;
         return (((uint8_t)buf[0] & 0x3f) << 8)| (uint8_t)buf[1];
     } else if (REDIS_RDB_32B == type) {
-        if (read(fd, &len, 4) == 0) return REDIS_RDB_LENERR;
+        if (crc_read(fd, &len, 4) == 0) return REDIS_RDB_LENERR;
         return ntohl(len); 
     } else {
         if(is_encoded) *is_encoded = 1;
@@ -93,13 +111,13 @@ rdb_load_int(int fd, uint8_t enc)
     char buf[4];
 
     if (REDIS_RDB_ENC_INT8 == enc) {
-        if (read(fd, buf, 1) == 0) goto READERR;
+        if (crc_read(fd, buf, 1) == 0) goto READERR;
         return (int8_t)buf[0];
     } else if (REDIS_RDB_ENC_INT16 == enc) {
-        if (read(fd, buf, 2) == 0) goto READERR;
+        if (crc_read(fd, buf, 2) == 0) goto READERR;
         return (int16_t)((uint8_t)buf[0] | ((uint8_t)buf[1] << 8));
     } else {
-        if (read(fd, buf, 4) == 0) goto READERR;
+        if (crc_read(fd, buf, 4) == 0) goto READERR;
         return (int32_t)((uint8_t)buf[0] | ((uint8_t)buf[1] << 8) | ((uint8_t)buf[2] << 16) | ((uint8_t)buf[3] << 24));
     }
 READERR:
@@ -131,7 +149,7 @@ rdb_load_lzf_string(int fd)
     }
 
     int ret;
-    if ((ret = read(fd, cstr, clen)) == 0) goto err;
+    if ((ret = crc_read(fd, cstr, clen)) == 0) goto err;
     if( (ret = lzf_decompress(cstr, clen, str, len)) == 0) goto err;
     str[len] = '\0';
 
@@ -178,7 +196,7 @@ rdb_load_string(int fd)
         fprintf(stderr, "Exited, as malloc failed at load string.\n");
         exit(1);
     }
-    while ( i < len && (bytes = read(fd, buf + i, len - i))) {
+    while ( i < len && (bytes = crc_read(fd, buf + i, len - i))) {
         i += bytes;
     }
     buf[len] = '\0';
@@ -280,7 +298,7 @@ rdb_load_time(int fd)
     char buf[4];
     uint32_t t32;
 
-    if( read(fd, buf, 4) == 0) {
+    if( crc_read(fd, buf, 4) == 0) {
         fprintf(stderr, "Exited, as read error on load time.\n");
         exit(1);
     }
@@ -295,7 +313,7 @@ rdb_load_ms_time(int fd)
     char buf[8];
     uint64_t t64;
 
-    if( read(fd, buf, 8) == 0) {
+    if( crc_read(fd, buf, 8) == 0) {
         fprintf(stderr, "Exited, as read error on load microtime.\n");
         exit(1);
     }
@@ -308,13 +326,12 @@ int
 rdb_load(lua_State *L, const char *path)
 {
     char buf[128];
-    int version;
     uint8_t type, db_num;
     int expire_time;
 
     int rdb_fd = open(path, O_RDONLY);
     // read magic string(5bytes) and version(4bytes)
-    if(read(rdb_fd, buf, 9) == 0) {
+    if(crc_read(rdb_fd, buf, 9) == 0) {
         fprintf(stderr, "Exited, as read error on laod version\n");
         exit(1);
     }
@@ -345,7 +362,7 @@ rdb_load(lua_State *L, const char *path)
 
         // select db
         if (REDIS_SELECT_DB == type) {
-            if (read(rdb_fd, buf, 1) == 0) {
+            if (crc_read(rdb_fd, buf, 1) == 0) {
                 fprintf(stderr, "Exited, as read error on laod db num.\n");
             }
             db_num = (uint8_t)buf[0];
@@ -378,6 +395,14 @@ rdb_load(lua_State *L, const char *path)
         free(key);
     }
 
+    if (version >= 5) {
+        uint64_t expected_crc = 0;
+        read(rdb_fd, &expected_crc, 8);
+        memrev64ifbe(expected_crc);
+        if(cksum != expected_crc) {
+            fprintf(stderr, "checksum error, expect %llu, real %llu.\n", cksum, expected_crc);
+        }
+    }
     close(rdb_fd);
 
     return 0;
