@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include "rdb.h"
+#include "log.h"
 
 static void
 usage(void)
@@ -61,7 +62,7 @@ main(int argc, char **argv)
     }
 
     if(is_show_version) {
-        fprintf(stderr, "\nHELLO, THIS RDB PARSER VERSION 1.0\n\n");
+       fprintf(stderr, "\nHELLO, THIS RDB PARSER VERSION 1.0\n\n");
     }
     if(is_show_help) {
         usage();
@@ -70,21 +71,18 @@ main(int argc, char **argv)
         exit(0);
     }
     if(!rdb_file) {
-        fprintf(stderr, "ERR: U must specify rdb file by option -f filepath.\n");
-        exit(0);
+        logger(ERROR, "You must specify rdb file by option -f filepath.\n");
     }
     if(!lua_file) {
         lua_file = "../scripts/example.lua";
     }
     if (access(rdb_file, R_OK) != 0)
     {
-        fprintf(stderr, "rdb file %s is not exists.\n", rdb_file);
-        exit(1);
+        logger(ERROR, "rdb file %s is not exists.\n", rdb_file);
     }
     if (access(lua_file, R_OK) != 0)
     {
-        fprintf(stderr, "lua file %s is not exists.\n", lua_file);
-        exit(1);
+        logger(ERROR, "lua file %s is not exists.\n", lua_file);
     }
 
     L = script_init(lua_file);

@@ -1,6 +1,7 @@
 #include "script.h"
 #include <stdlib.h>
 #include <string.h>
+#include "log.h"
 
 void
 lua_loadlib(lua_State *L, const char *libname, lua_CFunction luafunc) {
@@ -17,8 +18,11 @@ script_init(const char *filename)
     luaL_dofile(L, filename);
 
     lua_newtable(L);
-    lua_setglobal(L,"env");
+    lua_setglobal(L, RDB_ENV);
 
+    if (!script_check_func_exists(L, RDB_CB)) {
+        logger(ERROR, "function %s is reqired in %s.\n", RDB_CB, filename);
+    }
     return L;
 }
 

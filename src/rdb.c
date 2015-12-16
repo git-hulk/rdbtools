@@ -12,6 +12,7 @@
 #include "zipmap.h"
 #include "script.h"
 #include "crc64.h"
+#include "log.h"
 #include "endian.h"
 
 #define MAGIC_STR "REDIS"
@@ -66,7 +67,7 @@ rdb_load_type(int fd)
 {
     char buf[1];
     if(crc_read(fd, buf, 1) == 0) {
-        fprintf(stderr, "Exited, as read error on load type.\n");
+        logger(ERROR, "Exited, as read error on load type.\n");
         exit(1);
     }
 
@@ -121,7 +122,7 @@ rdb_load_int(int fd, uint8_t enc)
         return (int32_t)((uint8_t)buf[0] | ((uint8_t)buf[1] << 8) | ((uint8_t)buf[2] << 16) | ((uint8_t)buf[3] << 24));
     }
 READERR:
-    fprintf(stderr, "Exited, as read error on load integer.\n");
+    logger(ERROR, "Exited, as read error on load integer.\n");
     exit(1);
 }
 
@@ -144,7 +145,7 @@ rdb_load_lzf_string(int fd)
     cstr = malloc(clen);
     str = malloc(len+1);
     if (!cstr || !str) {
-        fprintf(stderr, "Exited, as malloc failed at load lzf string.\n");
+        logger(ERROR, "Exited, as malloc failed at load lzf string.\n");
         exit(1);
     }
 
@@ -185,16 +186,14 @@ rdb_load_string(int fd)
 
              default:
                 // unkonwn error.
-                fprintf(stderr, "Exited, as error on load string.\n");
-                exit(1);
+                logger(ERROR, "Exited, as error on load string.\n");
         }
     }
 
     int i = 0, bytes;
     buf = malloc(len + 1);
     if (!buf) {
-        fprintf(stderr, "Exited, as malloc failed at load string.\n");
-        exit(1);
+        logger(ERROR, "Exited, as malloc failed at load string.\n");
     }
     while ( i < len && (bytes = crc_read(fd, buf + i, len - i))) {
         i += bytes;
@@ -299,8 +298,7 @@ rdb_load_time(int fd)
     uint32_t t32;
 
     if( crc_read(fd, buf, 4) == 0) {
-        fprintf(stderr, "Exited, as read error on load time.\n");
-        exit(1);
+        logger(ERROR, "Exited, as read error on load time.\n");
     }
     memcpy(&t32, buf, 4);
 
@@ -314,8 +312,7 @@ rdb_load_ms_time(int fd)
     uint64_t t64;
 
     if( crc_read(fd, buf, 8) == 0) {
-        fprintf(stderr, "Exited, as read error on load microtime.\n");
-        exit(1);
+        logger(ERROR, "Exited, as read error on load microtime.\n");
     }
     memcpy(&t64, buf, 8);
 
@@ -332,14 +329,13 @@ rdb_load(lua_State *L, const char *path)
     int rdb_fd = open(path, O_RDONLY);
     // read magic string(5bytes) and version(4bytes)
     if(crc_read(rdb_fd, buf, 9) == 0) {
-        fprintf(stderr, "Exited, as read error on laod version\n");
-        exit(1);
+        logger(ERROR,"Exited, as read error on laod version\n");
     }
     buf[9] = '\0';
     if(memcmp(buf, MAGIC_STR, 5) != 0) return -2;
     version = atoi(buf + 5);
 
-    lua_getglobal(L, "env");
+    lua_getglobal(L, RDB_ENV);
     script_pushtableinteger(L, "version", version);
     lua_pop(L,-1);
 
@@ -363,10 +359,10 @@ rdb_load(lua_State *L, const char *path)
         // select db
         if (REDIS_SELECT_DB == type) {
             if (crc_read(rdb_fd, buf, 1) == 0) {
-                fprintf(stderr, "Exited, as read error on laod db num.\n");
+                logger(ERROR, "Exited, as read error on laod db num.\n");
             }
             db_num = (uint8_t)buf[0];
-            lua_getglobal(L, "env");
+            lua_getglobal(L, RDB_ENV);
             script_pushtableinteger(L, "db_num", db_num);
             lua_pop(L,-1);
             continue;
@@ -378,7 +374,7 @@ rdb_load(lua_State *L, const char *path)
         // read key
         char *key = rdb_load_string(rdb_fd);
         if (key) {
-            lua_getglobal(L, "handle");
+            lua_getglobal(L, RDB_CB); 
             lua_newtable(L);
             script_pushtablestring(L, "key", key);
             script_pushtableinteger(L, "expire_time", expire_time);
@@ -386,7 +382,7 @@ rdb_load(lua_State *L, const char *path)
             // read value
             rdb_load_value(L, rdb_fd, type);
             if( lua_pcall(L, 1, 0, 0) != 0 ) {
-                printf("error running function `f': %s",
+                logger(ERROR, "Error running function `f': %s",
                         lua_tostring(L, -1));
             }
                 
@@ -400,7 +396,7 @@ rdb_load(lua_State *L, const char *path)
         read(rdb_fd, &expected_crc, 8);
         memrev64ifbe(expected_crc);
         if(cksum != expected_crc) {
-            fprintf(stderr, "checksum error, expect %llu, real %llu.\n", cksum, expected_crc);
+            logger(ERROR, "checksum error, expect %llu, real %llu.\n", cksum, expected_crc);
         }
     }
     close(rdb_fd);
