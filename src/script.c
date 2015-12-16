@@ -16,6 +16,9 @@ script_init(const char *filename)
     luaL_openlibs(L);
     luaL_dofile(L, filename);
 
+    lua_newtable(L);
+    lua_setglobal(L,"env");
+
     return L;
 }
 

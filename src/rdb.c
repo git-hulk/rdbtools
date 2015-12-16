@@ -322,6 +322,11 @@ rdb_load(lua_State *L, const char *path)
     if(memcmp(buf, MAGIC_STR, 5) != 0) return -2;
     version = atoi(buf + 5);
 
+    lua_getglobal(L, "env");
+    script_pushtableinteger(L, "version", version);
+    lua_pop(L,-1);
+
+
     while (1) {
         expire_time = -1;
         type = rdb_load_type(rdb_fd);
@@ -344,6 +349,9 @@ rdb_load(lua_State *L, const char *path)
                 fprintf(stderr, "Exited, as read error on laod db num.\n");
             }
             db_num = (uint8_t)buf[0];
+            lua_getglobal(L, "env");
+            script_pushtableinteger(L, "db_num", db_num);
+            lua_pop(L,-1);
             continue;
         }
 
