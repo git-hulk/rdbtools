@@ -382,7 +382,7 @@ rdb_load(lua_State *L, const char *path)
             // read value
             rdb_load_value(L, rdb_fd, type);
             if( lua_pcall(L, 1, 0, 0) != 0 ) {
-                logger(ERROR, "Error running function `f': %s",
+                logger(ERROR, "Runing handle function failed: %s",
                         lua_tostring(L, -1));
             }
                 
