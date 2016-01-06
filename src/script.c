@@ -18,7 +18,9 @@ script_init(const char *filename)
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
     lua_loadlib(L, "cjson", luaopen_cjson);
-    luaL_dofile(L, filename);
+    if (luaL_dofile(L, filename)) {
+        logger(ERROR,"%s", lua_tostring(L, -1));
+    }
 
     lua_newtable(L);
     lua_setglobal(L, RDB_ENV);
