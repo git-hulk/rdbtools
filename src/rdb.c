@@ -69,6 +69,18 @@ rdb_crc_read(int fildes, void *buf, size_t nbyte)
 }
 
 // ================================== READ DATA FROOM RDB FILE. ==================================== //
+static void 
+check_crc(int fd, uint64_t real_crc)
+{
+    uint64_t expected_crc = 0;
+
+    read(fd, &expected_crc, 8);
+    memrev64ifbe(expected_crc);
+    if(real_crc != expected_crc) {
+        logger(ERROR, "checksum error, expect %llu, real %llu.\n", real_crc, expected_crc);
+    }
+}
+
 static uint8_t
 rdb_read_kv_type(int fd)
 {
@@ -477,14 +489,8 @@ rdb_load(lua_State *L, const char *path)
         free(key);
     }
 
-    if (version >= 5) {
-        uint64_t expected_crc = 0;
-        read(rdb_fd, &expected_crc, 8);
-        memrev64ifbe(expected_crc);
-        if(cksum != expected_crc) {
-            logger(ERROR, "checksum error, expect %llu, real %llu.\n", cksum, expected_crc);
-        }
-    }
+    if (version > 5) check_crc(rdb_fd, cksum);
+
     close(rdb_fd);
 
     return 0;
