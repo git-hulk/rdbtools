@@ -35,10 +35,10 @@ script.o: script.c script.h log.h ../deps/lua/src/lua.h \
 util.o: util.c util.h
 ziplist.o: ziplist.c ziplist.h script.h ../deps/lua/src/lua.h \
   ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
-  ../deps/lua/src/lualib.h util.h endian.h
+  ../deps/lua/src/lualib.h util.h endian.h log.h
 zipmap.o: zipmap.c zipmap.h script.h ../deps/lua/src/lua.h \
   ../deps/lua/src/luaconf.h ../deps/lua/src/lauxlib.h \
-  ../deps/lua/src/lualib.h endian.h
+  ../deps/lua/src/lualib.h endian.h log.h
 
 %.o: %.c 
 	$(CC) $(CFLAGS) $(CINCLUDES)  -c $<

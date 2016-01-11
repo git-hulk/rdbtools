@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "log.h"
 
 #include "endian.h"
 
@@ -57,8 +58,7 @@ void push_zipmap(lua_State *L, const char *zm)
         klen = zipmap_entry_strlen(zm);
         key = malloc(klen + 1);
         if (!key) {
-            fprintf(stderr, "Exited, as malloc failed at zipmap.\n");
-            exit(1);
+            logger(ERROR, "Exited, as malloc failed at zipmap.\n");
         }
 
         memcpy(key, zm + zipmap_entry_len_size(zm), klen);
@@ -69,8 +69,7 @@ void push_zipmap(lua_State *L, const char *zm)
         vlen = zipmap_entry_strlen(zm);
         val = malloc(vlen + 1);
         if (!val) {
-            fprintf(stderr, "Exited, as malloc failed at zipmap.\n");
-            exit(1);
+            logger(ERROR, "Exited, as malloc failed at zipmap.\n");
         }
 
         memcpy(val, zm + zipmap_entry_len_size(zm) + 1, vlen);
