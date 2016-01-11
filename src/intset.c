@@ -4,22 +4,6 @@
 
 #include "endian.h"
 
-void
-intset_dump(intset *is)
-{
-    printf("encoding: %d\n", is->encoding);
-    printf("length: %d\n", is->length);
-
-    int i;
-    int64_t v;
-    printf("element { ");
-    for (i = 0; i < is->length; i++) {
-        intset_get(is, i, &v);
-        printf("%lld\t", v);
-    }
-    printf("}\n");
-}
-
 uint8_t
 intset_get(intset *is, int pos, int64_t *v)
 {
@@ -44,3 +28,20 @@ intset_get(intset *is, int pos, int64_t *v)
     }
     return 1;
 }
+
+void
+intset_dump(intset *is)
+{
+    printf("encoding: %d\n", is->encoding);
+    printf("length: %d\n", is->length);
+
+    int i;
+    int64_t v;
+    printf("element { ");
+    for (i = 0; i < is->length; i++) {
+        intset_get(is, i, &v);
+        printf("%lld\t", v);
+    }
+    printf("}\n");
+}
+

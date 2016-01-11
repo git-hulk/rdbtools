@@ -4,23 +4,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include "log.h"
-
 #include "endian.h"
 
 #define ZM_END 0xff
 #define ZM_BIGLEN 0xfd
-
 #define ZM_IS_END(entry) ((uint8_t)entry[0] == ZM_END)
 
 uint32_t
 zipmap_entry_len_size(const char *entry)
 {
+    uint32_t size = 0;
     if ((uint8_t)entry[0] < ZM_BIGLEN) {
-        return 1;
+        size = 1;
     } else if ((uint8_t)entry[0] == ZM_BIGLEN) {
-        return 5;
+        size = 5;
     }
-    return 0;
+
+    return size;
 }
 
 uint32_t
@@ -60,7 +60,6 @@ void push_zipmap(lua_State *L, const char *zm)
         if (!key) {
             logger(ERROR, "Exited, as malloc failed at zipmap.\n");
         }
-
         memcpy(key, zm + zipmap_entry_len_size(zm), klen);
         key[klen] = '\0';
         zm += zipmap_entry_len(zm);
@@ -71,13 +70,11 @@ void push_zipmap(lua_State *L, const char *zm)
         if (!val) {
             logger(ERROR, "Exited, as malloc failed at zipmap.\n");
         }
-
         memcpy(val, zm + zipmap_entry_len_size(zm) + 1, vlen);
         val[vlen] = '\0';
         zm += zipmap_entry_len(zm) + 1;
 
         script_pushtablestring(L, key, val);
-
         free(key);
         free(val);
     }

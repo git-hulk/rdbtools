@@ -12,10 +12,7 @@
 uint32_t
 ziplist_prev_len_size(const char *s)
 {
-    if ((uint8_t)s[0] < ZIPLIST_BIGLEN) 
-        return 1;
-    else
-        return 5;
+    return ((uint8_t)s[0] < ZIPLIST_BIGLEN) ? 1 : 5;
 }
 
 uint8_t
@@ -24,8 +21,10 @@ ziplist_entry_is_str(const char *entry)
     uint8_t enc;
     enc = entry[ziplist_prev_len_size(entry)];
     enc &= ZIP_ENC_STR_MASK;
-    if (enc == ZIP_ENC_STR_6B || enc == ZIP_ENC_STR_14B
-      || enc == ZIP_ENC_STR_32B) {
+    if (enc == ZIP_ENC_STR_6B 
+      || enc == ZIP_ENC_STR_14B
+      || enc == ZIP_ENC_STR_32B
+    ) {
         return 1;
     } else {
         return 0;
@@ -48,6 +47,7 @@ ziplist_entry_strlen(const char *entry)
     } else if (enc == ZIP_ENC_STR_32B) {
         return ((uint8_t)entry[pos + 1] << 24) | ((uint8_t)entry[pos + 2] << 16) | ((uint8_t)entry[pos + 3] << 8) | (uint8_t)entry[pos + 4];
     }
+
     return 0;
 }
 
@@ -119,7 +119,6 @@ ziplist_entry_int(const char *entry, int64_t *v)
     int16_t v16;
     int32_t v32;
     int64_t v64;
-
     uint8_t enc;
     uint32_t pre_len_size;
     char *content;
@@ -132,34 +131,30 @@ ziplist_entry_int(const char *entry, int64_t *v)
     if (enc == ZIP_ENC_INT8) {
         memcpy(&v8, content + 1, sizeof(int8_t));
         *v = v8;
-        return 1;
     } else if (enc == ZIP_ENC_INT16) {
         memcpy(&v16, content + 1, sizeof(int16_t));
         memrev16ifbe(&v16);
         *v = v16;
-        return 1;
     } else if (enc == ZIP_ENC_INT24) {
         memcpy(&v32, content + 1, 3);
         memrev32ifbe(&v32);
         *v = v32;
-        return 1;
     } else if (enc == ZIP_ENC_INT32) {
         memcpy(&v32, content + 1, sizeof(int32_t));
         memrev32ifbe(&v32);
         *v = v32;
-        return 1;
     } else if (enc == ZIP_ENC_INT64){
         memcpy(&v64, content + 1, sizeof(int64_t));
         memrev64ifbe(&v64);
         *v = v64;
-        return 1;
     } else if ((enc & 0xf0) == 0xf0){
         v8 = content[0] & 0x0f;
         *v = v8;
-        return 1;
+    } else {
+        return 0;
     }
   
-    return  0;
+    return  1;
 }
 
 void
