@@ -49,7 +49,15 @@ script_check_func_exists(lua_State * L, const char *func_name) {
 }
 
 void
-script_pushtableinteger(lua_State* L , char* key , double value)
+script_pushtableunsigned(lua_State* L , char* key, unsigned value)
+{
+    lua_pushstring(L, key);
+    lua_pushunsigned(L, value);
+    lua_settable(L, -3);
+}
+
+void
+script_pushtableinteger(lua_State* L , char* key , int value)
 {
     lua_pushstring(L, key);
     lua_pushinteger(L, value);

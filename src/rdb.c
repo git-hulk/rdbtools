@@ -401,31 +401,25 @@ rdb_load_value(lua_State *L, int fd, int type)
 }
 
 static uint32_t
-rdb_load_time(int fd)
-{
-    char buf[4];
-    uint32_t t32;
-
-    if( rdb_crc_read(fd, buf, 4) == 0) {
-        logger(ERROR, "Exited, as read error on load time.\n");
-    }
-    memcpy(&t32, buf, 4);
-
-    return t32;
-}
-
-static uint64_t
-rdb_load_ms_time(int fd)
+rdb_load_expiretime(int fd, int type)
 {
     char buf[8];
+    uint32_t t32;
     uint64_t t64;
+    int ret;
 
-    if( rdb_crc_read(fd, buf, 8) == 0) {
-        logger(ERROR, "Exited, as read error on load microtime.\n");
+    if (REDIS_EXPIRE_SEC == type) {
+        ret = rdb_crc_read(fd, buf, 4);
+        memcpy(&t32, buf, 4);
+    } else {
+        ret = rdb_crc_read(fd, buf, 8);
+        memcpy(&t64, buf, 8);
+        t32 = (uint32_t) (t64 / 1000);
     }
-    memcpy(&t64, buf, 8);
+    
+    if (!ret) logger(ERROR, "Load expire time error.");
 
-    return t64;
+    return t32;
 }
 
 int
@@ -448,16 +442,11 @@ rdb_load(lua_State *L, const char *path)
     while (1) {
         expire_time = -1;
         type = rdb_read_kv_type(rdb_fd);
-
         // load expire time if exists
-        if (REDIS_EXPIRE_SEC == type) {
-            expire_time = rdb_load_time(rdb_fd); 
-            type = rdb_read_kv_type(rdb_fd);
-        } else if (REDIS_EXPIRE_MS == type) {
-            expire_time = rdb_load_ms_time(rdb_fd) / 1000; 
+        if (REDIS_EXPIRE_SEC == type || REDIS_EXPIRE_MS == type) {
+            expire_time = rdb_load_expiretime(rdb_fd, type); 
             type = rdb_read_kv_type(rdb_fd);
         }
-
         // select db
         if (REDIS_SELECT_DB == type) {
             if (rdb_crc_read(rdb_fd, buf, 1) == 0) {
@@ -478,23 +467,20 @@ rdb_load(lua_State *L, const char *path)
             lua_newtable(L);
             script_pushtablestring(L, KEY_FIELD_STR, key);
             script_pushtableinteger(L, EXP_FIELD_STR, expire_time);
-
             // read value
             rdb_load_value(L, rdb_fd, type);
             // set value type
             rdb_set_value_type(L, type);
+            // revoke lua callback function
             if( lua_pcall(L, 1, 0, 0) != 0 ) {
                 logger(ERROR, "Runing handle function failed: %s", lua_tostring(L, -1));
             }
-                
         }
-
         free(key);
     }
 
     if (version > 5) rdb_check_crc(rdb_fd, cksum);
 
     close(rdb_fd);
-
     return 0;
 }
