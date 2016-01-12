@@ -55,6 +55,9 @@ uint64_t cksum = 0;
  // NOTE: trick here, version set 5 as we want to calc crc where read version field.
 int version = 5;
 
+
+// ================================== COMMON UTIL FOR RDB. ==================================== //
+
 static ssize_t    
 rdb_crc_read(int fildes, void *buf, size_t nbyte)
 {
@@ -68,9 +71,17 @@ rdb_crc_read(int fildes, void *buf, size_t nbyte)
     return len;
 }
 
+static void
+rdb_set_int_env(lua_State *L, char *key, int value)
+{
+    lua_getglobal(L, RDB_ENV);
+    script_pushtableinteger(L, key, value);
+    lua_pop(L,-1);
+}
+
 // ================================== READ DATA FROOM RDB FILE. ==================================== //
 static void 
-check_crc(int fd, uint64_t real_crc)
+rdb_check_crc(int fd, uint64_t real_crc)
 {
     uint64_t expected_crc = 0;
 
@@ -421,7 +432,7 @@ int
 rdb_load(lua_State *L, const char *path)
 {
     char buf[128];
-    uint8_t type, db_num;
+    uint8_t type;
     int expire_time;
 
     int rdb_fd = open(path, O_RDONLY);
@@ -432,11 +443,7 @@ rdb_load(lua_State *L, const char *path)
     buf[9] = '\0';
     if(memcmp(buf, MAGIC_STR, 5) != 0) return -2;
     version = atoi(buf + 5);
-
-    lua_getglobal(L, RDB_ENV);
-    script_pushtableinteger(L, VERSION_STR, version);
-    lua_pop(L,-1);
-
+    rdb_set_int_env(L, VERSION_STR, version);
 
     while (1) {
         expire_time = -1;
@@ -457,11 +464,7 @@ rdb_load(lua_State *L, const char *path)
                 logger(ERROR, "Exited, as read error on laod db num.\n");
             }
 
-            db_num = (uint8_t)buf[0];
-            lua_getglobal(L, RDB_ENV);
-            // set db num
-            script_pushtableinteger(L, DB_NUM_STR, db_num);
-            lua_pop(L,-1);
+            rdb_set_int_env(L, DB_NUM_STR, (uint8_t)buf[0]);
             continue;
         }
 
@@ -489,7 +492,7 @@ rdb_load(lua_State *L, const char *path)
         free(key);
     }
 
-    if (version > 5) check_crc(rdb_fd, cksum);
+    if (version > 5) rdb_check_crc(rdb_fd, cksum);
 
     close(rdb_fd);
 
