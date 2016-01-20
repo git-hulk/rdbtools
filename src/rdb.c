@@ -1,10 +1,13 @@
 #include <stdio.h>
+#include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <arpa/inet.h>
+#include <sys/stat.h>
+
 #include "util.h"
 #include "lzf.h"
 #include "intset.h"
@@ -50,10 +53,13 @@
 #define EXP_FIELD_STR "expire_time" 
 #define DB_NUM_STR "db_num"
 #define VERSION_STR "version"
+#define MAGIC_VERSION 5
 
+// NOTE: trick here, version set 5 as we want to calc crc where read version field.
+int version = MAGIC_VERSION;
 uint64_t cksum = 0;
- // NOTE: trick here, version set 5 as we want to calc crc where read version field.
-int version = 5;
+uint64_t loaded_bytes = 0;
+
 
 
 // ================================== COMMON UTIL FOR RDB. ==================================== //
@@ -68,6 +74,7 @@ rdb_crc_read(int fildes, void *buf, size_t nbyte)
         cksum = crc64(cksum, buf, len);
     }
 
+    loaded_bytes += len;
     return len;
 }
 
@@ -85,7 +92,7 @@ rdb_check_crc(int fd, uint64_t real_crc)
 {
     uint64_t expected_crc = 0;
 
-    read(fd, &expected_crc, 8);
+    rdb_crc_read(fd, &expected_crc, 8);
     memrev64ifbe(expected_crc);
     if(real_crc != expected_crc) {
         logger(ERROR, "checksum error, expect %llu, real %llu.\n", real_crc, expected_crc);
@@ -479,7 +486,17 @@ rdb_load(lua_State *L, const char *path)
         free(key);
     }
 
-    if (version > 5) rdb_check_crc(rdb_fd, cksum);
+    if (version >= MAGIC_VERSION) rdb_check_crc(rdb_fd, cksum);
+    
+    struct stat st;
+    if(fstat(rdb_fd, &st) != 0) {
+        logger(ERROR, "fstat error when load rdb file, as %s.", strerror(errno));
+    }
+    
+    if(st.st_size != loaded_bytes) {
+        logger(ERROR, "Load rdb file failed, Bytes is %llu, expected is %llu version %d", 
+                loaded_bytes, st.st_size, version);
+    }
 
     close(rdb_fd);
     return 0;
