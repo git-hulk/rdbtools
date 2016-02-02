@@ -482,6 +482,7 @@ rdb_load(lua_State *L, const char *path)
             if( lua_pcall(L, 1, 0, 0) != 0 ) {
                 logger(ERROR, "Runing handle function failed: %s", lua_tostring(L, -1));
             }
+            script_need_gc(L);
         }
         free(key);
     }

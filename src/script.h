@@ -14,4 +14,5 @@ void script_pushtablestring(lua_State* L , char* key , char* value);
 void script_pushtableinteger(lua_State* L , char* key , int value);
 void script_pushtableunsigned(lua_State* L , char* key , unsigned value);
 void script_push_list_elem(lua_State* L, char* key, int ind);
+void script_need_gc(lua_State* L);
 #endif

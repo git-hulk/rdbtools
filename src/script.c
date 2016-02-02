@@ -78,3 +78,16 @@ script_push_list_elem(lua_State* L , char* key, int ind)
     lua_pushstring(L, key);
     lua_rawseti(L,-2,ind + 1);
 }
+
+void
+script_need_gc(lua_State* L)
+{
+#define LUA_GC_CYCLE_PERIOD 500
+    static long gc_count = 0; 
+
+    gc_count++;
+    if (gc_count == LUA_GC_CYCLE_PERIOD) {
+        lua_gc(L, LUA_GCSTEP, LUA_GC_CYCLE_PERIOD);
+        gc_count = 0; 
+    }  
+}
