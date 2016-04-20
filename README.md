@@ -79,4 +79,3 @@ print(env.db_num)
 >```Blog```: [www.hulkdev.com](http://www.hulkdev.com)
 
 any bugs? send mail, and I will appreciate your help.
-
