@@ -1,0 +1,6 @@
+compiler:
+  - clang
+  - gcc
+language: c
+
+make
